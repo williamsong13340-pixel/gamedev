@@ -15,6 +15,8 @@
     "clean": "No text, letters, numbers, logos, signatures, watermarks, UI or frames anywhere in the image.",
     "template": "The FIRST attached image is a strict layout template: keep the exact silhouette, proportions, size and position on the canvas, and keep every window, wheel and coupler exactly where it is. Only repaint it in the requested style and theme; do not add anything outside the silhouette.",
     "template_character": "The FIRST attached image is a strict pose template: keep the exact pose, body proportions (about 4 heads tall), limb positions, size and position on the canvas. Three-quarter view, facing right. Arms and legs must stay clearly separated from the body. Only dress and paint the figure.",
-    "style_ref": "Match the art style, line weight, palette, texture and level of detail of the attached style reference image exactly."
+    "style_ref": "Match the art style, line weight, palette, texture and level of detail of the attached style reference image exactly.",
+    "spritesheet": "This is a sprite sheet of EXACTLY the character in the FIRST attached image: identical face, hair, clothes, colours, proportions, outlines and art style in every frame. Layout: 8 frames in 4 columns x 2 rows of equal cells, read left to right, top to bottom. One full-body pose per cell, centred in its cell, the same size in every cell, feet on the same baseline height in every cell, side view facing right. Consecutive frames change smoothly and the last frame flows back into the first.",
+    "asset_sheet": "Fully transparent background. No grid lines, cell borders, frame numbers, labels, text, ground or shadows."
   }
 }

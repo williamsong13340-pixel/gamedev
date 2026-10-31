@@ -4,5 +4,12 @@
   "max_images_per_run": 12,
   "max_images_total": 300,
   "timeout_seconds": 300,
-  "max_retries": 3
+  "max_retries": 3,
+  "video": {
+    "model": "sora-2",
+    "max_seconds_per_run": 24,
+    "max_seconds_total": 240,
+    "poll_interval_seconds": 10,
+    "max_wait_seconds": 1200
+  }
 }

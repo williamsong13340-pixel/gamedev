@@ -1,0 +1,15 @@
+{
+  "batch": "video-001-anim-test",
+  "description": "Animation bake-off, Sora side: the same test character (art/chars/mechanic.png) animated by image-to-video, then turned into seamless loops with: python3 tools/sprites.py video <mp4> --name sora-walk. Each 4-second clip is billed per second of video.",
+  "defaults": {
+    "size": "720x1280",
+    "seconds": 4,
+    "reference": "art/chars/mechanic.png",
+    "background": "#00FF00"
+  },
+  "prompt_template": "2D game animation of the exact illustrated character shown in the first frame. The character {action}, seen from the side, facing right. The camera is completely static and locked off: no zoom, no pan, no cuts. The character stays centred at the same size for the whole clip. The background stays perfectly flat, solid pure green (#00FF00) the whole time: no floor, no shadows, no props, no lighting changes. Keep the character's design, colours, outlines and flat 2D illustrated style exactly as in the first frame, so it looks like hand-drawn 2D animation, not 3D. Smooth, even motion that repeats seamlessly.",
+  "jobs": [
+    {"id": "video-walk", "action": "walks in place, as if on a treadmill, in a smooth, natural, looping walk cycle with arms swinging"},
+    {"id": "video-work", "action": "stands in place and tightens a large bolt in front of them with a big wrench, in a steady repeating motion: wind up, push hard, pull back"}
+  ]
+}

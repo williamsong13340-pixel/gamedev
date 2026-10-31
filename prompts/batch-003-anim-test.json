@@ -1,0 +1,35 @@
+{
+  "batch": "003-anim-test",
+  "description": "Animation bake-off, Sunburst side. Set defaults.style to the chosen direction first. Step 1: --only char- creates the test character from the pose template; save the best one as art/chars/mechanic.png. Step 2: --only sheet- draws walk and work cycles as 8-frame sprite sheets; process them with: python3 tools/sprites.py sheet <png> --grid 4x2 --name sunburst-walk",
+  "defaults": {
+    "mode": "edit",
+    "style": "storybook",
+    "quality": "high",
+    "n": 1,
+    "params": {"background": "transparent", "output_format": "png"}
+  },
+  "jobs": [
+    {
+      "id": "char-mechanic",
+      "size": "1024x1536",
+      "n": 2,
+      "images": ["templates/character_pose.png", "art/anchor/style_anchor.png"],
+      "blocks": ["palette", "template_character", "style_ref", "asset", "clean"],
+      "subject": "A survivor character for the game, full body, standing: a middle-aged train mechanic in a padded, patched work coat, a fur-lined cap with goggles pushed up, a thick knitted scarf, heavy gloves and boots, a big wrench hanging from the belt. Tired but kind face, a little stubble, breath slightly visible in the cold."
+    },
+    {
+      "id": "sheet-walk",
+      "size": "1536x1024",
+      "images": ["art/chars/mechanic.png", "art/anchor/style_anchor.png"],
+      "blocks": ["spritesheet", "palette", "asset_sheet", "clean"],
+      "subject": "A smooth, natural 8-frame looping WALK cycle of this character (contact, down, passing, up — for each leg), arms swinging opposite to the legs, a slight up-and-down bob."
+    },
+    {
+      "id": "sheet-work",
+      "size": "1536x1024",
+      "images": ["art/chars/mechanic.png", "art/anchor/style_anchor.png"],
+      "blocks": ["spritesheet", "palette", "asset_sheet", "clean"],
+      "subject": "A smooth 8-frame looping WORK animation of this character standing in place: tightening a large bolt in front of them with the big wrench — wind up, push hard, pull back, repeat."
+    }
+  ]
+}
