@@ -1,0 +1,3 @@
+# Asset pipeline tools (tools/*.py)
+Pillow>=10
+requests>=2.31

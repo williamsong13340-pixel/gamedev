@@ -1,0 +1,8 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "base_url": "https://api.openai.com/v1",
+  "max_images_per_run": 12,
+  "max_images_total": 300,
+  "timeout_seconds": 300,
+  "max_retries": 3
+}

@@ -1,0 +1,41 @@
+{
+  "batch": "002-rolling-stock",
+  "description": "Run AFTER the style anchor is chosen (art/anchor/style_anchor.png must exist) and its style key is set in defaults.style. Repaints the gray-box templates into the locomotive and the first carriage types, exterior and matching interior, so they all couple on the same rail line and the interiors line up with the exteriors.",
+  "defaults": {
+    "mode": "edit",
+    "style": "storybook",
+    "size": "1536x1024",
+    "quality": "high",
+    "n": 2,
+    "blocks": ["palette", "side_view", "template", "style_ref", "asset", "clean"],
+    "params": {"background": "transparent", "output_format": "png"}
+  },
+  "jobs": [
+    {
+      "id": "locomotive",
+      "images": ["templates/locomotive_exterior.png", "art/anchor/style_anchor.png"],
+      "subject": "A rugged steam locomotive for a frozen post-apocalyptic world, facing right: riveted dark steel boiler patched with scrap plates, a large snowplough at the front, a glowing headlamp, warm firelight leaking from the cab window, snow and icicles on the roof edges."
+    },
+    {
+      "id": "carriage-living-ext",
+      "images": ["templates/carriage_exterior.png", "art/anchor/style_anchor.png"],
+      "subject": "The outside of a living-quarters carriage: wooden and steel panels patched with scrap metal, warm amber light glowing in all three windows, curtains made of old blankets, snow on the roof, a stovepipe on the roof."
+    },
+    {
+      "id": "carriage-living-int",
+      "images": ["templates/carriage_interior.png", "art/anchor/style_anchor.png"],
+      "blocks": ["palette", "cutaway", "template", "style_ref", "asset", "clean"],
+      "subject": "The inside of the same living-quarters carriage, empty of people: bunk beds against the back wall, a small iron stove, hanging lamps, crates, patched blankets, pipes under the ceiling; the three back-wall windows show a dark snowy night; the floor band stays clear and walkable; the door openings at both ends stay open."
+    },
+    {
+      "id": "carriage-greenhouse-ext",
+      "images": ["templates/carriage_exterior.png", "art/anchor/style_anchor.png"],
+      "subject": "The outside of a greenhouse carriage: frosted glass panels in a riveted steel frame, green plants visible behind the glass, warm grow-lights glowing, snow on the roof edges."
+    },
+    {
+      "id": "carriage-boiler-ext",
+      "images": ["templates/carriage_exterior.png", "art/anchor/style_anchor.png"],
+      "subject": "The outside of a coal and boiler carriage: heavy black steel, coal heaped on top, pressure gauges and pipes, orange furnace glow through grilles in the windows, steam leaking from valves."
+    }
+  ]
+}

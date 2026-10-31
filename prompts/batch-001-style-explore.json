@@ -1,0 +1,24 @@
+{
+  "batch": "001-style-explore",
+  "description": "First run once the API key works: three candidate art directions, each shown as an exterior key art (train in the wasteland) and an interior key art (cutaway carriage with survivors). The user picks one; it becomes art/anchor/style_anchor.png. 9 images total.",
+  "defaults": {
+    "mode": "generate",
+    "size": "1536x1024",
+    "quality": "high",
+    "n": 1,
+    "blocks": ["palette", "mood", "clean"],
+    "params": {}
+  },
+  "subjects": {
+    "exterior": "Key art for a mobile game: a long steam locomotive with a big snowplough pulling six patched, armoured carriages across a frozen post-apocalyptic wasteland at blue-hour dusk, light snowfall. Warm amber light glows from every carriage window and from the firebox. Background: snow-buried ruins of a city and a frozen dead forest; a faint aurora in the sky. The train is seen exactly from the side and fills the lower middle third of the frame.",
+    "interior": "Key art for a mobile game: one train carriage shown as a cutaway cross-section. Inside is a cosy improvised home for survivors: bunk beds, a small iron stove with a glowing fire, hanging lamps, pipes along the ceiling, crates and patched blankets. Four survivors in warm winter clothes (fur hats, scarves, goggles) do everyday tasks: one cooks at the stove, one repairs a pipe, one reads in a bunk, a child warms their hands. Through the windows in the back wall: a snowy landscape at night."
+  },
+  "jobs": [
+    {"id": "A-storybook-exterior", "style": "storybook", "subject_ref": "exterior", "n": 2, "blocks": ["palette", "mood", "side_view", "keyart", "clean"]},
+    {"id": "A-storybook-interior", "style": "storybook", "subject_ref": "interior", "blocks": ["palette", "mood", "cutaway", "clean"]},
+    {"id": "B-papercraft-exterior", "style": "papercraft", "subject_ref": "exterior", "n": 2, "blocks": ["palette", "mood", "side_view", "keyart", "clean"]},
+    {"id": "B-papercraft-interior", "style": "papercraft", "subject_ref": "interior", "blocks": ["palette", "mood", "cutaway", "clean"]},
+    {"id": "C-silhouette-exterior", "style": "silhouette", "subject_ref": "exterior", "n": 2, "blocks": ["palette", "mood", "side_view", "keyart", "clean"]},
+    {"id": "C-silhouette-interior", "style": "silhouette", "subject_ref": "interior", "blocks": ["palette", "mood", "cutaway", "clean"]}
+  ]
+}

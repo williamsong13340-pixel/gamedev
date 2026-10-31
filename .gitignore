@@ -1,0 +1,22 @@
+# --- Secrets: never commit. The API key lives only in the cloud environment settings. ---
+.env
+.env.*
+*.key
+*.pem
+secrets/
+credentials*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Godot (engine cache, regenerated on open)
+.godot/
+*.import.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
