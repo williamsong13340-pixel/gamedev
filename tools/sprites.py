@@ -247,8 +247,8 @@ def find_loop(images: list[Image.Image], fps: float, min_s: float, max_s: float,
 # ---------------------------------------------------------------- output ----
 
 def write_animation(name: str, frames: list[Image.Image], anchor, fps: float, source: str,
-                    info: dict, label: str | None) -> Path:
-    out = ANIM_ROOT / name
+                    info: dict, label: str | None, root: Path | None = None) -> Path:
+    out = (root or ANIM_ROOT) / name
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -362,7 +362,7 @@ PREVIEW_HTML = """<!DOCTYPE html>
   .meta span { color:var(--dim); font-size:13px; }
 </style></head>
 <body>
-<header><h1>__TITLE__</h1><p>同一个角色、同一个动作，用不同方法做出来的动画，并排比较。</p></header>
+<header><h1>__TITLE__</h1><p>__SUBTITLE__</p></header>
 <div class="bar">
   <span>速度</span>
   <button data-speed="0.5">0.5×</button><button data-speed="1" class="on">1×</button><button data-speed="2">2×</button>
@@ -388,10 +388,10 @@ for (const a of ANIMS) {
 }
 let last = performance.now();
 function tick(now) {
-  const dt = (now - last) / 1000; last = now;
+  const dt = Math.max(0, (now - last) / 1000); last = now;  // first rAF stamp can precede `last`
   for (const p of players) {
     if (!paused) p.t += dt * speed;
-    const idx = Math.floor(p.t * p.a.fps) % p.imgs.length;
+    const n = p.imgs.length, idx = ((Math.floor(p.t * p.a.fps) % n) + n) % n;
     if (idx !== p.idx && p.imgs[idx].complete) {
       p.ctx.clearRect(0, 0, p.a.w, p.a.h); p.ctx.drawImage(p.imgs[idx], 0, 0); p.idx = idx;
     }
@@ -431,7 +431,8 @@ def cmd_preview(a):
                         "w": meta["frame_size"][0], "h": meta["frame_size"][1], "info": note})
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    html = PREVIEW_HTML.replace("__TITLE__", a.title).replace("__DATA__", json.dumps(entries))
+    html = (PREVIEW_HTML.replace("__TITLE__", a.title).replace("__SUBTITLE__", a.subtitle)
+            .replace("__DATA__", json.dumps(entries)))
     out.write_text(html, encoding="utf-8")
     print(f"preview with {len(entries)} animation(s) -> {rel(out)} ({out.stat().st_size // 1024} KB)")
 
@@ -464,6 +465,7 @@ def main():
     p.add_argument("anims", nargs="+", help="animation names (art/anim/<name>) or folders")
     p.add_argument("--out", default="art/preview/anim-test.html")
     p.add_argument("--title", default="人物动画对比")
+    p.add_argument("--subtitle", default="同一个角色、同一个动作，用不同方法做出来的动画，并排比较。")
     p.set_defaults(func=cmd_preview)
 
     a = ap.parse_args()

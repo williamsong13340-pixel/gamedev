@@ -2,7 +2,7 @@
 
 一款手机游戏：一列列车在饥寒末日的冰原上永不停歇地行驶。玩家升级车厢、加挂新车厢，点开任意一节车厢，就能看到里面的幸存者在生活、工作。
 
-美术路线：**列车和世界的运动由引擎和代码完成**（视差滚动、车厢颠簸、车轮连杆、粒子、光影）；**人物动作由 AI 直接画成动作帧**（GPT Image 2.5 Sunburst 序列图，或 Sora 图生视频后抽帧），不用骨骼拆件。详见 [`docs/art-bible.md`](docs/art-bible.md)。
+美术路线：**列车和世界的运动由引擎和代码完成**（视差滚动、车厢颠簸、车轮连杆、粒子、光影）；**人物动作由 AI 直接画成动作帧**（我们设计动作骨架、GPT Image 2.5 Sunburst 照着画；或 Sora 图生视频后抽帧），不用骨骼拆件。详见 [`docs/art-bible.md`](docs/art-bible.md)。
 
 ## 目录
 
@@ -12,6 +12,7 @@ prompts/style.json         所有提示词的唯一来源（风格词、色板�
 prompts/batch-*.json       每一批出图任务
 templates/                 灰模模板图 + templates.json（锚点坐标，引擎直接读取）
 tools/make_templates.py    生成模板图
+tools/poses.py             生成动作骨架图（templates/poses/），AI 照着骨架画动作帧
 tools/imagegen.py          调用图像 API 出图（带安全与预算保护）
 tools/videogen.py          调用视频 API（Sora）生成人物动作短片（同样的安全与预算保护）
 tools/sprites.py           序列图/视频 → 去背景、对齐、找循环的动画帧；生成动画对比页
@@ -47,8 +48,10 @@ python3 tools/imagegen.py prompts/batch-002-rolling-stock.json --only locomotive
 
 # 人物动画对比测试
 python3 tools/imagegen.py prompts/batch-003-anim-test.json --only char-     # 1. 角色立绘，选一张存为 art/chars/mechanic.png
-python3 tools/imagegen.py prompts/batch-003-anim-test.json --only sheet-    # 2a. Sunburst 序列图
-python3 tools/videogen.py prompts/video-001-anim-test.json                  # 2b. Sora 视频
+python3 tools/poses.py --preview <目录>                                    # 生成骨架图（+可选的动画预览）
+python3 tools/imagegen.py prompts/batch-003-anim-test.json --only posed-    # 2a. 骨架引导：照骨架画（推荐）
+python3 tools/imagegen.py prompts/batch-003-anim-test.json --only sheet-    # 2b. AI 自由发挥的序列图
+python3 tools/videogen.py prompts/video-001-anim-test.json                  # 2c. Sora 视频
 python3 tools/sprites.py sheet <序列图.png> --grid 4x2 --name sunburst-walk
 python3 tools/sprites.py video <视频.mp4> --name sora-walk
 python3 tools/sprites.py preview sunburst-walk sora-walk --out art/preview/anim-test.html
