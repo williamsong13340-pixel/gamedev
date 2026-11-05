@@ -1,0 +1,36 @@
+{
+  "file": "art/raw/001-style-explore/C-silhouette-interior__20261105T001744Z_1.png",
+  "batch": "001-style-explore",
+  "job": "C-silhouette-interior",
+  "index": 1,
+  "model": "gpt-image-2.5-sunburst",
+  "mode": "generate",
+  "size": "1536x1024",
+  "quality": "high",
+  "params": {},
+  "inputs": [],
+  "mask": null,
+  "style": "silhouette",
+  "blocks": [
+    "palette",
+    "mood",
+    "cutaway",
+    "clean"
+  ],
+  "prompt": "Key art for a mobile game: one train carriage shown as a cutaway cross-section. Inside is a cosy improvised home for survivors: bunk beds, a small iron stove with a glowing fire, hanging lamps, pipes along the ceiling, crates and patched blankets. Four survivors in warm winter clothes (fur hats, scarves, goggles) do everyday tasks: one cooks at the stove, one repairs a pipe, one reads in a bunk, a child warms their hands. Through the windows in the back wall: a snowy landscape at night.\n\nArt style: premium 2D mobile game art built from flat atmospheric silhouette layers. Distant layers are lighter and bluer, near layers darker; smooth gradient sky; minimal interior detail on shapes; crisp clean edges; warm light sources glow softly against the cold scene.\n\nColour palette: cold desaturated blues, slate greys and blue-white snow for the world and the metal (#1B2433, #3C4A5C, #7FA3B8, #E8EEF2); rust and old-wood browns (#7A4A32, #5C4636); warm amber and fire orange (#F2A65A, #E8692C, #FFD89A) used ONLY for lamps, lit windows, fire and other light sources.\n\nMood: a bleak, freezing post-apocalyptic world, yet the train carries warmth, hope and human life.\n\nView: architectural cutaway cross-section of the carriage seen exactly from the side, like a dollhouse with the near wall removed; we look straight at the back wall; no perspective.\n\nNo text, letters, numbers, logos, signatures, watermarks, UI or frames anywhere in the image.",
+  "revised_prompt": null,
+  "usage_for_request": {
+    "input_tokens": 354,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 354
+    },
+    "output_tokens": 1372,
+    "output_tokens_details": {
+      "image_tokens": 1372,
+      "text_tokens": 0
+    },
+    "total_tokens": 1726
+  },
+  "created_utc": "20261105T001744Z"
+}

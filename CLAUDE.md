@@ -20,8 +20,8 @@
 ## 当前进度（2026-11-05）
 
 - 已完成：出图和视频脚本、模板图、动作骨架图（走路、拧螺栓）、提示词库、风格规范。全部用模拟接口测试通过。
-- 还没做：从未真正调用过 API，一张图都还没生成。
-- 用户说改不了上一个会话的云环境设置，但已经自己配置好了 key（可能新建了环境）。
+- 第 0 步完成：`--check` 通过（api.openai.com，OPENAI_API_KEY，Sunburst 可用，不需要 `--proxy-auth`）。
+- 第 1 步已出图：9 张在 `art/raw/001-style-explore/`，总览图 `art/preview/001-contact.png` 已发给用户，**等用户报编号**。
 
 ## 下一步
 
@@ -77,5 +77,7 @@ python3 tools/imagegen.py --check
 ## 已知情况（发现新情况就更新这里）
 
 - 全部工作在分支 `ccr-12c7c891-s3zgy9` 上（它也是仓库默认分支）。如果新会话的分支上没有这些文件，先 `git fetch origin ccr-12c7c891-s3zgy9` 再合并。
-- 尚未验证：Sunburst 是否支持透明背景（`background: transparent`）、`1536x1024` 尺寸、多张输入图（`image[]`）。
+- 已验证：Sunburst 支持 `1536x1024`、`quality: high`，每张约 30 秒。
+- 尚未验证：透明背景（`background: transparent`）、多张输入图（`image[]`）。
+- 第一批发现：三种画风（storybook / papercraft / silhouette）出来差别很小，B 不太像纸艺、C 不太像平涂剪影。模型偏向同一种精细插画风格，如果要更明显的区别，需要在提示词里把风格写得更重。
 - 待机呼吸、眨眼这类细微动作不要逐帧画，用一张图加代码轻微缩放和摆动来做（见 art-bible 第 6 节）。

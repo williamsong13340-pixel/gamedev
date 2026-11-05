@@ -1,0 +1,37 @@
+{
+  "file": "art/raw/001-style-explore/A-storybook-exterior__20261105T001454Z_1.png",
+  "batch": "001-style-explore",
+  "job": "A-storybook-exterior",
+  "index": 1,
+  "model": "gpt-image-2.5-sunburst",
+  "mode": "generate",
+  "size": "1536x1024",
+  "quality": "high",
+  "params": {},
+  "inputs": [],
+  "mask": null,
+  "style": "storybook",
+  "blocks": [
+    "palette",
+    "mood",
+    "side_view",
+    "keyart",
+    "clean"
+  ],
+  "prompt": "Key art for a mobile game: a long steam locomotive with a big snowplough pulling six patched, armoured carriages across a frozen post-apocalyptic wasteland at blue-hour dusk, light snowfall. Warm amber light glows from every carriage window and from the firebox. Background: snow-buried ruins of a city and a frozen dead forest; a faint aurora in the sky. The train is seen exactly from the side and fills the lower middle third of the frame.\n\nArt style: premium 2D mobile game art, semi-flat storybook illustration. Clean, confident, simple shapes with minimal clutter; subtle paper-grain texture; thin dark-brown outlines of even weight; soft cel shading with at most two shade steps; gentle gradients only in skies and light glows.\n\nColour palette: cold desaturated blues, slate greys and blue-white snow for the world and the metal (#1B2433, #3C4A5C, #7FA3B8, #E8EEF2); rust and old-wood browns (#7A4A32, #5C4636); warm amber and fire orange (#F2A65A, #E8692C, #FFD89A) used ONLY for lamps, lit windows, fire and other light sources.\n\nMood: a bleak, freezing post-apocalyptic world, yet the train carries warmth, hope and human life.\n\nCamera: strict orthographic side elevation, camera perpendicular to the train, no perspective, no vanishing points, level horizon.\n\nComposition: wide cinematic key art, readable at phone size, strong value contrast between the cold surroundings and the warm lights.\n\nNo text, letters, numbers, logos, signatures, watermarks, UI or frames anywhere in the image.",
+  "revised_prompt": null,
+  "usage_for_request": {
+    "input_tokens": 728,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 728
+    },
+    "output_tokens": 2744,
+    "output_tokens_details": {
+      "image_tokens": 2744,
+      "text_tokens": 0
+    },
+    "total_tokens": 3472
+  },
+  "created_utc": "20261105T001454Z"
+}
