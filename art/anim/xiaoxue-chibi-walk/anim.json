@@ -1,0 +1,37 @@
+{
+  "name": "xiaoxue-chibi-walk",
+  "label": "Q版小雪：走路",
+  "fps": 10.0,
+  "frame_count": 8,
+  "frame_size": [
+    214,
+    431
+  ],
+  "anchor_feet": [
+    108,
+    416
+  ],
+  "sheet": {
+    "file": "sheet.png",
+    "columns": 8,
+    "rows": 1
+  },
+  "frames": [
+    "frame_00.png",
+    "frame_01.png",
+    "frame_02.png",
+    "frame_03.png",
+    "frame_04.png",
+    "frame_05.png",
+    "frame_06.png",
+    "frame_07.png"
+  ],
+  "source": "/tmp/claude-0/-home-user-gamedev/9421ae51-b003-5f08-a60f-ad25730b80db/scratchpad/walk_clean.png",
+  "info": {
+    "median_height": 474.0,
+    "scale": 0.8438818565400844,
+    "rescaled_frames": 0,
+    "grid": "4x2",
+    "warnings": []
+  }
+}

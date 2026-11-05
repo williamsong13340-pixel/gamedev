@@ -1,0 +1,41 @@
+{
+  "file": "art/raw/004-chibi-walk/posed-walk-xiaoxue__20261105T011820Z_1.png",
+  "batch": "004-chibi-walk",
+  "job": "posed-walk-xiaoxue",
+  "index": 1,
+  "model": "gpt-image-2.5-sunburst",
+  "mode": "edit",
+  "size": "1536x1024",
+  "quality": "high",
+  "params": {
+    "background": "transparent",
+    "output_format": "png"
+  },
+  "inputs": [
+    "templates/poses/chibi_walk_sheet.png",
+    "art/chars/xiaoxue_chibi.png"
+  ],
+  "mask": null,
+  "style": "anime_chibi",
+  "blocks": [
+    "pose_sheet_chibi",
+    "asset_sheet",
+    "ending_cn"
+  ],
+  "prompt": "An 8-frame looping walk cycle of this chibi character, side view facing right, cute light bouncy steps. Keep the exact same anime cel-shaded art style, face, hat, red scarf, cream coat, backpack and colours as the SECOND image in every frame.\n\n画法：日系二次元动漫插画，线条干净，赛璐璐上色加柔和的光影过渡，不做成 3D。萌系、温馨治愈的手机游戏美术。Q 版小人：大头、两三头身，五官可爱，表情温柔开心。\n\nThe FIRST attached image is a pose guide sheet: 8 frames in 4 columns x 2 rows of equal cells, read left to right, top to bottom. Each cell shows a simple big-headed chibi mannequin (about 2.5 heads tall) in one pose of the animation. ORANGE limbs are the character's near (camera-side) arm and leg; BLUE limbs are the far arm and leg, behind the body; the gray shapes are the head and torso; the small dark wedge on the head shows the facing direction (right). Draw EXACTLY the character from the SECOND attached image in each of these 8 poses, in the same cell, at the same position and size, matching every limb angle, every joint bend and the head position of the mannequin. The mannequin is only a guide and must not be visible in the result. The character must look identical in every frame: same face, hair, clothes, colours, outlines and proportions.\n\nFully transparent background. No grid lines, cell borders, frame numbers, labels, text, ground or shadows.\n\n不要文字，不要水印，不要标志。设计全部原创，不要模仿任何现有作品里的角色、火车或场景。",
+  "revised_prompt": null,
+  "usage_for_request": {
+    "input_tokens": 3481,
+    "input_tokens_details": {
+      "image_tokens": 3072,
+      "text_tokens": 409
+    },
+    "output_tokens": 1372,
+    "output_tokens_details": {
+      "image_tokens": 1372,
+      "text_tokens": 0
+    },
+    "total_tokens": 4853
+  },
+  "created_utc": "20261105T011820Z"
+}

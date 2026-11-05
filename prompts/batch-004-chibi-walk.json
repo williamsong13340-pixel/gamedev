@@ -1,0 +1,42 @@
+{
+ "batch": "004-chibi-walk",
+ "description": "抖音小游戏画风（萌系动漫 Q 版）的第一个人物动画：Q 版小雪走路。先出角色（char-），再照 Q 版骨架画 8 帧走路（posed-）。",
+ "defaults": {
+  "style": "anime_chibi",
+  "quality": "high",
+  "n": 1,
+  "params": {
+   "background": "transparent",
+   "output_format": "png"
+  }
+ },
+ "jobs": [
+  {
+   "id": "char-xiaoxue-chibi",
+   "mode": "generate",
+   "size": "1024x1536",
+   "blocks": [
+    "warm_cold_cn",
+    "clothing_cn",
+    "asset_cn",
+    "ending_cn"
+   ],
+   "subject": "小雪的 Q 版小人（大头、两三头身），全身，侧身四分之三朝右站直，双手自然垂下，手里不拿东西，表情温柔微笑。长相和衣着：棕色中长发；戴白色毛线帽，顶上一个毛球，侧边一颗扣子；围着带流苏的红围巾；奶白色带毛领的厚羽绒长外套，里面是白色麻花毛衣；深棕色工装长裤，膝盖有耐磨补丁，裤腿塞进带白毛边的棕色系带雪地靴；戴深色手套；背着黑色背包，背包上卷着一条毯子。一侧有暖橙色的光，背光一侧带一点冷蓝、粉红的反光。"
+  },
+  {
+   "id": "posed-walk-xiaoxue",
+   "mode": "edit",
+   "size": "1536x1024",
+   "images": [
+    "templates/poses/chibi_walk_sheet.png",
+    "art/chars/xiaoxue_chibi.png"
+   ],
+   "blocks": [
+    "pose_sheet_chibi",
+    "asset_sheet",
+    "ending_cn"
+   ],
+   "subject": "An 8-frame looping walk cycle of this chibi character, side view facing right, cute light bouncy steps. Keep the exact same anime cel-shaded art style, face, hat, red scarf, cream coat, backpack and colours as the SECOND image in every frame."
+  }
+ ]
+}

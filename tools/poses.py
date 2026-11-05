@@ -55,6 +55,17 @@ P = {
     "w_upper_arm": 22, "w_forearm": 19, "w_thigh": 30, "w_shin": 25, "w_foot": 16,
     "torso_w": 74, "pelvis_w": 68,
 }
+P_ADULT = dict(P)
+
+# Q-version (chibi) proportions: about 2.5 heads tall, big head, short limbs.
+P_CHIBI = {
+    "head_w": 158, "head_h": 160, "neck": 6, "torso": 92, "shoulder_drop": 12, "hip_drop": 10,
+    "sh_near_dx": -16, "sh_far_dx": 14, "hip_near_dx": -10, "hip_far_dx": 10,
+    "upper_arm": 40, "forearm": 36, "hand_r": 13, "thigh": 46, "shin": 42,
+    "ankle_h": 12, "heel": 10, "foot_len": 38,
+    "w_upper_arm": 22, "w_forearm": 20, "w_thigh": 30, "w_shin": 27, "w_foot": 18,
+    "torso_w": 86, "pelvis_w": 80,
+}
 
 
 # ----------------------------------------------------------------- maths ----
@@ -172,6 +183,7 @@ def pose_work(t: float) -> dict:
 CYCLES = {
     "walk": {"fn": pose_walk, "fps": 10, "label": "骨架：走路"},
     "work": {"fn": pose_work, "fps": 8, "label": "骨架：拧螺栓"},
+    "chibi_walk": {"fn": pose_walk, "fps": 10, "label": "骨架：Q版走路", "proportions": P_CHIBI},
 }
 
 
@@ -271,6 +283,8 @@ def main():
             "legend": {"orange": "near arm and leg", "blue": "far arm and leg", "gray": "head, torso, props",
                        "dark wedge": "nose / facing direction"}, "cycles": {}}
     for name, cyc in CYCLES.items():
+        P.clear()
+        P.update(cyc.get("proportions", P_ADULT))  # every helper reads P, so swap it in place
         poses = [cyc["fn"](k / (COLS * ROWS)) for k in range(COLS * ROWS)]
         sheet_image(poses).save(OUT / f"{name}_sheet.png", optimize=True)
         meta["cycles"][name] = {"fps": cyc["fps"], "frames": [
