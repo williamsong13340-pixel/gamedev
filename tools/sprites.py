@@ -357,6 +357,7 @@ PREVIEW_HTML = """<!DOCTYPE html>
   .stage.light { background:#d9e1e8; }
   .stage.check { background:conic-gradient(#9aa4ad 25%, #c9d0d6 0 50%, #9aa4ad 0 75%, #c9d0d6 0) 0 0/24px 24px; }
   canvas { max-width:100%; max-height:100%; image-rendering:auto; }
+  .stage.small canvas { height:120px; width:auto; }  /* about the size of a Q-version figure in the game */
   .meta { padding:10px 14px 14px; }
   .meta b { display:block; font-weight:600; }
   .meta span { color:var(--dim); font-size:13px; }
@@ -368,6 +369,8 @@ PREVIEW_HTML = """<!DOCTYPE html>
   <button data-speed="0.5">0.5×</button><button data-speed="1" class="on">1×</button><button data-speed="2">2×</button>
   <span>背景</span>
   <button data-bg="dark" class="on">深色</button><button data-bg="light">浅色</button><button data-bg="check">棋盘格</button>
+  <span>大小</span>
+  <button data-size="big" class="on">放大看</button><button data-size="small">游戏里的大小</button>
   <button id="pause">暂停</button>
 </div>
 <div class="grid" id="grid"></div>
@@ -405,8 +408,14 @@ document.querySelectorAll("[data-speed]").forEach(b => b.onclick = () => {
 });
 document.querySelectorAll("[data-bg]").forEach(b => b.onclick = () => {
   bgClass = b.dataset.bg;
-  players.forEach(p => p.stage.className = "stage " + bgClass);
+  players.forEach(p => p.stage.className = "stage " + bgClass + sizeClass);
   document.querySelectorAll("[data-bg]").forEach(x => x.classList.toggle("on", x === b));
+});
+let sizeClass = "";
+document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => {
+  sizeClass = b.dataset.size === "small" ? " small" : "";
+  players.forEach(p => p.stage.className = "stage " + bgClass + sizeClass);
+  document.querySelectorAll("[data-size]").forEach(x => x.classList.toggle("on", x === b));
 });
 document.getElementById("pause").onclick = e => {
   paused = !paused; e.target.textContent = paused ? "播放" : "暂停";

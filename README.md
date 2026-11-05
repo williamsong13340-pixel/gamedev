@@ -16,6 +16,7 @@ tools/poses.py             生成动作骨架图（templates/poses/），AI 照�
 tools/imagegen.py          调用图像 API 出图（带安全与预算保护）
 tools/videogen.py          调用视频 API（Sora）生成人物动作短片（同样的安全与预算保护）
 tools/sprites.py           序列图/视频 → 去背景、对齐、找循环的动画帧；生成动画对比页
+tools/stabilize.py         走路序列图 → 稳定版：上半身每帧同一张、只有腿逐帧、程序加起伏（解决抽动和闪烁）
 tools/imagegen.config.json 模型名、预算上限（图片按张、视频按秒）
 art/anchor/                选定的风格锚点图
 art/chars/                 选定的角色立绘（动画的起点）
@@ -56,6 +57,7 @@ python3 tools/videogen.py prompts/video-001-anim-test.json                  # 2c
 python3 tools/sprites.py sheet <序列图.png> --grid 4x2 --name sunburst-walk
 python3 tools/sprites.py video <视频.mp4> --name sora-walk
 python3 tools/sprites.py preview sunburst-walk sora-walk --out art/preview/anim-test.html
+python3 tools/stabilize.py <序列图.png> --grid 4x2 --name xiaoxue-chibi-walk-steady --ref 2 --debug <目录>  # 稳定版走路
 python3 tools/sprites.py contact art/raw/001-style-explore --out art/preview/001-contact.png  # 编号总览图，方便挑选
 ```
 

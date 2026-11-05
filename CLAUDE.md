@@ -30,7 +30,8 @@
 - 已完成：出图和视频脚本、模板图、动作骨架图（走路、拧螺栓）、提示词库、风格规范。全部用模拟接口测试通过。
 - 第 0 步完成：`--check` 通过（api.openai.com，OPENAI_API_KEY，Sunburst 可用，不需要 `--proxy-auth`）。
 - 第 1 步已出图：9 张在 `art/raw/001-style-explore/`（旧方向，用户没选，改做抖音版了）。
-- **Q 版小雪走路动画已做好**（批次 `prompts/batch-004-chibi-walk.json`）：角色 `art/chars/xiaoxue_chibi.png`，8 帧在 `art/anim/xiaoxue-chibi-walk/`，预览 `art/preview/xiaoxue-chibi-walk.html`。用了 Q 版骨架 `templates/poses/chibi_walk_sheet.png`（`tools/poses.py` 新增 `chibi_walk`）。等用户看效果。
+- **Q 版小雪走路动画已做好**（批次 `prompts/batch-004-chibi-walk.json`）：角色 `art/chars/xiaoxue_chibi.png`，原始 8 帧在 `art/anim/xiaoxue-chibi-walk/`。用了 Q 版骨架 `templates/poses/chibi_walk_sheet.png`（`tools/poses.py` 新增 `chibi_walk`）。
+- 用户反馈原始版"一抽一抽的、一直在闪"。已用新工具 `tools/stabilize.py` 做成稳定版 `art/anim/xiaoxue-chibi-walk-steady/`（上半身用第 2 帧当母版、腿逐帧、程序起伏），对比页 `art/preview/xiaoxue-walk-fix.html` 已发给用户，**等用户反馈**。稳定版的手臂不摆，用户要的话下一步做程序摆臂。
 
 ## 下一步
 
@@ -90,4 +91,5 @@ python3 tools/imagegen.py --check
 - 已验证：透明背景可用，多张输入图（`image[]`）可用。
 - Sunburst 的透明图外圈会带一层半透明光晕，用前把 alpha<200 的像素去掉（批次 004 就是这么处理的）；骨架引导的 Q 版走路效果很好，脚底对齐、角色每帧一致。
 - 第一批发现：三种画风（storybook / papercraft / silhouette）出来差别很小，B 不太像纸艺、C 不太像平涂剪影。模型偏向同一种精细插画风格，如果要更明显的区别，需要在提示词里把风格写得更重。
+- 整帧 AI 序列会抽会闪（原因和数据见 art-bible 第 6 节最后一条），走路一律用 `tools/stabilize.py` 出稳定版。新角色先加 `--debug <目录>` 看分段图：绿线 = 衣服下摆，橙色 = 从各帧取的腿，蓝色 = 补出来的一小段腿。下摆是按衣服颜色找的，深色衣服配深色裤子时要检查。
 - 待机呼吸、眨眼这类细微动作不要逐帧画，用一张图加代码轻微缩放和摆动来做（见 art-bible 第 6 节）。

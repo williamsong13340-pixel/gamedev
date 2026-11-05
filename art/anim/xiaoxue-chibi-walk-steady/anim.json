@@ -1,0 +1,87 @@
+{
+  "name": "xiaoxue-chibi-walk-steady",
+  "label": "Q版小雪：走路（稳定版）",
+  "fps": 10.0,
+  "frame_count": 8,
+  "frame_size": [
+    202,
+    421
+  ],
+  "anchor_feet": [
+    107,
+    411
+  ],
+  "sheet": {
+    "file": "sheet.png",
+    "columns": 8,
+    "rows": 1
+  },
+  "frames": [
+    "frame_00.png",
+    "frame_01.png",
+    "frame_02.png",
+    "frame_03.png",
+    "frame_04.png",
+    "frame_05.png",
+    "frame_06.png",
+    "frame_07.png"
+  ],
+  "source": "art/raw/004-chibi-walk/posed-walk-xiaoxue__20261105T011820Z_1.png",
+  "info": {
+    "method": "tools/stabilize.py: master upper body + AI legs + coded bounce",
+    "ref": 2,
+    "bounce_px": [
+      0,
+      3,
+      0,
+      -3,
+      0,
+      3,
+      0,
+      -3
+    ],
+    "torso_registration": [
+      [
+        0.97,
+        20,
+        -8
+      ],
+      [
+        0.97,
+        12,
+        -7
+      ],
+      [
+        1.0,
+        0,
+        0
+      ],
+      [
+        1.01,
+        7,
+        4
+      ],
+      [
+        0.99,
+        26,
+        -18
+      ],
+      [
+        1.01,
+        25,
+        -10
+      ],
+      [
+        1.03,
+        8,
+        -3
+      ],
+      [
+        1.03,
+        10,
+        -1
+      ]
+    ],
+    "grid": "4x2"
+  }
+}
