@@ -31,7 +31,20 @@
 - 第 0 步完成：`--check` 通过（api.openai.com，OPENAI_API_KEY，Sunburst 可用，不需要 `--proxy-auth`）。
 - 第 1 步已出图：9 张在 `art/raw/001-style-explore/`（旧方向，用户没选，改做抖音版了）。
 - **Q 版小雪走路动画已做好**（批次 `prompts/batch-004-chibi-walk.json`）：角色 `art/chars/xiaoxue_chibi.png`，原始 8 帧在 `art/anim/xiaoxue-chibi-walk/`。用了 Q 版骨架 `templates/poses/chibi_walk_sheet.png`（`tools/poses.py` 新增 `chibi_walk`）。
-- 用户反馈原始版"一抽一抽的、一直在闪"。已用新工具 `tools/stabilize.py` 做成稳定版 `art/anim/xiaoxue-chibi-walk-steady/`（上半身用第 2 帧当母版、腿逐帧、程序起伏），对比页 `art/preview/xiaoxue-walk-fix.html` 已发给用户，**等用户反馈**。稳定版的手臂不摆，用户要的话下一步做程序摆臂。
+- 用户反馈原始版"一抽一抽的、一直在闪"。已用新工具 `tools/stabilize.py` 做成稳定版 `art/anim/xiaoxue-chibi-walk-steady/`（上半身用第 2 帧当母版、腿逐帧、程序起伏），对比页 `art/preview/xiaoxue-walk-fix.html` 已发给用户，稳定版的手臂不摆。
+- 用户看了稳定版说"还是不太行"，**想试 Google 的 Gemini Omni 视频模型**（用户说的"omni 最新的视频生成模型"）。准备情况：
+  - 现在的 OpenAI key 没有任何视频模型（没有 Sora；带 omni 的只有内容审核模型 `omni-moderation`）。
+  - 这个环境**能连上** `generativelanguage.googleapis.com`（不带 key 返回的是谷歌自己的 403），但打不开文档站 `ai.google.dev`。
+  - 已请用户在环境设置里加 `GEMINI_API_KEY`（谷歌 AI Studio 申请，需开通付费），新会话才能读到。
+  - 已备好：首帧/尾帧图 `art/chars/xiaoxue_side_walk.png`（稳定版母版那一帧的原尺寸侧身图），批次 `prompts/video-002-xiaoxue-walk-omni.json`（提示词、价格和型号说明都在里面）。
+
+## Gemini Omni 测试（有 GEMINI_API_KEY 后做）
+
+1. `env | cut -d= -f1 | grep -i gemini` 只看变量名，确认 key 在。没有就提醒用户（也可能是用户放在了 Network secrets，那样 key 由代理注入，要按代理注入的方式调用）。
+2. 免费列模型：GET `https://generativelanguage.googleapis.com/v1beta/models`（请求头 `x-goog-api-key`），找最新的 Omni 视频型号，看它支持哪种调用方法。
+3. 给 `tools/videogen.py` 加 Gemini 接口：沿用现有的保护（key 不打印、预算按秒记在 `art/video_ledger.jsonl`、`--dry-run`）。首帧、尾帧都传同一张图（`prepare_reference` 会把它放到纯绿背景、调成视频尺寸）。格式写错时接口会返回 400，不收钱，可以先试格式。
+4. 先跑一段 4 秒 360p 草稿（约 0.12 美元）确认能用，再跑 4 秒 720p（约 0.4 美元）。
+5. `python3 tools/sprites.py video <mp4> --name xiaoxue-omni-walk` 抽帧、抠绿、找循环；再用 `tools/sprites.py preview xiaoxue-chibi-walk xiaoxue-chibi-walk-steady xiaoxue-omni-walk` 做三方对比页发给用户。如实说：画风有没有跑偏、背景是不是一直纯绿、有没有原地走、循环接不接得上。
 
 ## 下一步
 

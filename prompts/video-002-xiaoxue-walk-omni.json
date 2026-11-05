@@ -1,0 +1,22 @@
+{
+ "batch": "video-002-xiaoxue-walk-omni",
+ "description": "小雪走路，用 Google Gemini Omni 图生视频。首帧和尾帧用同一张侧身走路图，逼模型回到起始姿势，得到无缝循环。出片后：python3 tools/sprites.py video <mp4> --name xiaoxue-omni-walk。tools/videogen.py 还没有 Gemini 接口：等 GEMINI_API_KEY 配好后，先免费列模型确认最新的 Omni 型号和请求格式，再写适配。",
+ "provider": "gemini",
+ "model": "gemini-omni-1.1-flash",
+ "model_note": "第三方报道的型号名，未经官方文档核实。有 key 后先 GET https://generativelanguage.googleapis.com/v1beta/models 免费确认，用账号里最新的 Omni 视频型号（网上也有人提到 1.2）。",
+ "price_note": "第三方报道：720p 约 0.10 美元/秒，360p 草稿约 0.03 美元/秒，API 没有免费额度。先跑一段 360p 草稿验证格式，再跑 720p。",
+ "defaults": {
+  "size": "720x1280",
+  "seconds": 4,
+  "first_frame": "art/chars/xiaoxue_side_walk.png",
+  "last_frame": "art/chars/xiaoxue_side_walk.png",
+  "background": "#00FF00",
+  "fill": 0.55
+ },
+ "jobs": [
+  {
+   "id": "omni-walk",
+   "prompt": "2D anime game animation of the exact chibi girl shown in the first frame: Japanese anime illustration style with clean outlines, cel shading and soft gradients, NOT 3D. She walks in place, as if on a treadmill, in a smooth, cute, slightly bouncy walk cycle seen exactly from the side, facing right: legs stepping naturally, arms in the puffy coat swinging gently, the scarf ends and the hat pompom bobbing slightly with each step. The camera is completely static and locked off: no zoom, no pan, no cuts. She stays centred at the same size and does not move across the frame. The background stays perfectly flat, solid pure green (#00FF00) for the whole clip: no floor, no shadows, no props, no lighting changes. Keep her face, hat, red scarf, cream down coat, backpack, colours and outlines exactly as in the first frame in every frame. The last frame is identical to the first frame, so the clip loops seamlessly. No text."
+  }
+ ]
+}
