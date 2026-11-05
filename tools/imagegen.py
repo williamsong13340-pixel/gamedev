@@ -5,6 +5,7 @@ Usage:
     python3 tools/imagegen.py prompts/batch-001-style-explore.json --dry-run
     python3 tools/imagegen.py prompts/batch-001-style-explore.json
     python3 tools/imagegen.py prompts/batch-002-rolling-stock.json --only carriage-living --n 1
+    python3 tools/imagegen.py --check     # free: key, network and model availability, no image made
 
 Safety:
   * The API key is read ONLY from the OPENAI_API_KEY environment variable. It is
@@ -150,9 +151,9 @@ def form_value(v) -> str:
     return str(v)
 
 
-def call_api(session: requests.Session, base_url: str, key: str, model: str, job: dict,
+def call_api(session: requests.Session, base_url: str, key: str | None, model: str, job: dict,
              timeout: int, max_retries: int) -> dict:
-    headers = {"Authorization": f"Bearer {key}"}  # per request only, never on the session
+    headers = {"Authorization": f"Bearer {key}"} if key else {}  # per request only, never on the session
     fields = {"model": model, "prompt": job["prompt"], "n": job["n"]}
     for k in ("size", "quality"):
         if job.get(k):
@@ -258,9 +259,53 @@ def save_images(result: dict, job: dict, batch: str, out_root: Path, ledger_path
     return saved
 
 
+def run_check(cfg: dict) -> int:
+    """Free preflight: is the key there, is the host allowed, does the key work, is the model listed?"""
+    model = os.environ.get("IMAGEGEN_MODEL") or cfg["model"]
+    base_url = (os.environ.get("OPENAI_BASE_URL") or cfg["base_url"]).rstrip("/")
+    check_base_url(base_url)
+    host = urlparse(base_url).hostname
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    print(f"host:  {host} ({'from OPENAI_BASE_URL' if os.environ.get('OPENAI_BASE_URL') else 'official default'})")
+    print(f"key:   OPENAI_API_KEY {'is set (' + str(len(key)) + ' chars)' if key else 'is NOT set'}")
+    print(f"model: {model}")
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    try:
+        r = requests.get(f"{base_url}/models", headers=headers, timeout=30)
+    except requests.exceptions.ProxyError:
+        print(f"RESULT: BLOCKED. The environment's network policy does not allow {host}; "
+              f"add it under Network access > Allowed domains.")
+        return 2
+    except requests.RequestException as e:
+        print(f"RESULT: network error: {redact(str(e), key)[:300]}")
+        return 2
+    if r.status_code in (401, 403):
+        print(f"RESULT: {host} is reachable but the request was not authorised (HTTP {r.status_code}). "
+              f"{'Key missing.' if not key else 'Key rejected.'} {redact(r.text[:300], key)}")
+        return 1
+    if r.status_code != 200:
+        print(f"RESULT: HTTP {r.status_code}: {redact(r.text[:300], key)}")
+        return 1
+    try:
+        ids = [m.get("id", "") for m in (r.json().get("data") or []) if isinstance(m, dict)]
+    except ValueError:
+        ids = []
+    note = "" if key else " (no key in env: the environment injects auth itself; run batches with --proxy-auth)"
+    print(f"RESULT: OK, authorised{note}. {len(ids)} model(s) listed.")
+    if ids and model in ids:
+        print(f"model {model}: available")
+    elif ids:
+        similar = [i for i in ids if "image" in i.lower() or "sunburst" in i.lower()]
+        print(f"model {model}: NOT in the provider's list. Image models listed: {', '.join(similar[:15]) or 'none'}")
+    return 0
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Generate game art from a batch spec.")
-    ap.add_argument("batch_file", help="e.g. prompts/batch-001-style-explore.json")
+    ap.add_argument("batch_file", nargs="?", help="e.g. prompts/batch-001-style-explore.json")
+    ap.add_argument("--check", action="store_true", help="free preflight check, generates nothing")
+    ap.add_argument("--proxy-auth", action="store_true",
+                    help="no key in env because the environment injects auth itself (see --check)")
     ap.add_argument("--dry-run", action="store_true", help="print requests, send nothing")
     ap.add_argument("--only", action="append", help="only jobs whose id contains/matches this (repeatable)")
     ap.add_argument("--n", type=int, help="override images per job (e.g. 1 for a cheap test)")
@@ -270,6 +315,10 @@ def main() -> None:
     args = ap.parse_args()
 
     cfg = load_json(CONFIG_PATH)
+    if args.check:
+        sys.exit(run_check(cfg))
+    if not args.batch_file:
+        ap.error("batch_file is required (or use --check)")
     style_lib = load_json(STYLE_PATH)
     spec = load_json(resolve(args.batch_file))
     batch = spec.get("batch") or Path(args.batch_file).stem
@@ -312,10 +361,11 @@ def main() -> None:
     if used + planned > cfg["max_images_total"]:
         sys.exit(f"total budget cap: {used} used + {planned} planned > max_images_total="
                  f"{cfg['max_images_total']}. Raise it in tools/imagegen.config.json only deliberately.")
-    key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not key:
-        sys.exit("OPENAI_API_KEY is not set. Add it in the cloud environment settings "
-                 "(never in code or chat), then start a new session.")
+    key = os.environ.get("OPENAI_API_KEY", "").strip() or None
+    if not key and not args.proxy_auth:
+        sys.exit("OPENAI_API_KEY is not set. Run --check; add the key in the cloud environment settings "
+                 "(never in code or chat) and start a new session, or use --proxy-auth if --check says "
+                 "the environment injects auth itself.")
 
     session = requests.Session()
     failures = 0

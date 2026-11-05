@@ -29,7 +29,7 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 ANIM_ROOT = ROOT / "art" / "anim"
@@ -437,6 +437,35 @@ def cmd_preview(a):
     print(f"preview with {len(entries)} animation(s) -> {rel(out)} ({out.stat().st_size // 1024} KB)")
 
 
+def cmd_contact(a):
+    """Numbered overview of a batch so the user can answer with a number."""
+    files = sorted(f for f in Path(a.folder).glob("*.png") if not f.name.endswith("_ref.png"))
+    if a.only:
+        files = [f for f in files if any(k in f.name for k in a.only)]
+    if not files:
+        sys.exit(f"no images in {a.folder}")
+    cols, t, label_h, pad = a.cols, a.thumb, 44, 16
+    rows = math.ceil(len(files) / cols)
+    sheet = Image.new("RGB", (pad + cols * (t + pad), pad + rows * (t + label_h + pad)), (20, 26, 34))
+    draw = ImageDraw.Draw(sheet)
+    font = ImageFont.load_default(size=26)
+    for k, f in enumerate(files):
+        im = Image.open(f).convert("RGBA")
+        im.thumbnail((t, t))
+        bg = Image.new("RGBA", im.size, (96, 104, 114, 255))  # mid gray shows transparent assets
+        bg.alpha_composite(im)
+        x, y = pad + (k % cols) * (t + pad), pad + (k // cols) * (t + label_h + pad)
+        sheet.paste(bg.convert("RGB"), (x + (t - im.width) // 2, y + (t - im.height) // 2))
+        job, idx = f.stem.split("__")[0], f.stem.rsplit("_", 1)[-1]
+        draw.text((x, y + t + 8), f"{k + 1}. {job} #{idx}", fill=(232, 238, 242), font=font)
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out)
+    print(f"contact sheet with {len(files)} image(s) -> {out}")
+    for k, f in enumerate(files):
+        print(f"  {k + 1}. {rel(f)}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -467,6 +496,14 @@ def main():
     p.add_argument("--title", default="人物动画对比")
     p.add_argument("--subtitle", default="同一个角色、同一个动作，用不同方法做出来的动画，并排比较。")
     p.set_defaults(func=cmd_preview)
+
+    c = sub.add_parser("contact", help="numbered overview image of a batch folder")
+    c.add_argument("folder", help="e.g. art/raw/001-style-explore")
+    c.add_argument("--out", required=True)
+    c.add_argument("--only", action="append", help="only files whose name contains this (repeatable)")
+    c.add_argument("--cols", type=int, default=3)
+    c.add_argument("--thumb", type=int, default=480, help="thumbnail size in px")
+    c.set_defaults(func=cmd_contact)
 
     a = ap.parse_args()
     a.func(a)

@@ -41,6 +41,7 @@ art/ledger.jsonl           出图账本（每张图一行）；art/video_ledger.
 
 ```bash
 pip install -r requirements.txt
+python3 tools/imagegen.py --check                                      # 免费检查：key、网络、模型是否可用
 python3 tools/make_templates.py                                        # 重新生成模板
 python3 tools/imagegen.py prompts/batch-001-style-explore.json --dry-run  # 预览，不花钱
 python3 tools/imagegen.py prompts/batch-001-style-explore.json            # 真正出图
@@ -55,6 +56,9 @@ python3 tools/videogen.py prompts/video-001-anim-test.json                  # 2c
 python3 tools/sprites.py sheet <序列图.png> --grid 4x2 --name sunburst-walk
 python3 tools/sprites.py video <视频.mp4> --name sora-walk
 python3 tools/sprites.py preview sunburst-walk sora-walk --out art/preview/anim-test.html
+python3 tools/sprites.py contact art/raw/001-style-explore --out art/preview/001-contact.png  # 编号总览图，方便挑选
 ```
+
+新会话的接手说明在 [`CLAUDE.md`](CLAUDE.md)（Claude Code 会自动读取）。
 
 如果用的不是 OpenAI 官方接口（例如兼容 OpenAI 的其他服务商），额外设置环境变量 `OPENAI_BASE_URL`，并把对应域名加入 Allowed domains。
