@@ -10,6 +10,8 @@
 - 这个脚本不会把任何卡牌内容打印到屏幕上，只打印数量。内容只出现在输出文件里。
 - key 从环境变量 XAI_API_KEY 读取；在云环境里由网络代理自动注入，不需要设置。
 - “保留”的条目一律使用原文，不采用模型回传的文字，保证没问题的内容一个字不变。
+- 默认不重试，并且有花费上限（--max-usd）。grok-4.7 思考很慢，一套内容太多会超过 5 分钟被网关掐断，
+  而被掐断的请求照样计费。内容多的牌组请先拆小再跑。
 """
 import argparse
 import concurrent.futures
@@ -87,7 +89,10 @@ def call(model, payload_items, timeout=900):
     return json.loads(m.group(0)), usage
 
 
-def review_deck(deck, model, retries=2):
+SPENT = {"usd": 0.0}
+
+
+def review_deck(deck, model, retries=0, max_usd=0.5):
     """返回 (新牌组, 对照行, 统计)。出错时原样保留整套。"""
     items = [{"i": i, "type": t, "text": x} for i, (t, x) in enumerate([("d", x) for x in deck["d"]] + [("s", x) for x in deck["s"]])]
     stats = {"total": len(items), "keep": 0, "rewrite": 0, "remove": 0, "retype": 0, "add": 0, "missing": 0, "too_long": 0, "failed": False,
@@ -105,9 +110,13 @@ def review_deck(deck, model, retries=2):
             send.append(it)
     result, err = None, None
     for attempt in range(retries + 1):
+        if SPENT["usd"] >= max_usd:              # 花费到上限就不再发新请求
+            err = "到达花费上限，没有发送"
+            break
         stats["attempts"] += 1
         try:
             result, usage = call(model, send)
+            SPENT["usd"] += usage.get("cost_in_usd_ticks", 0) / 1e10
             stats["tokens_in"] += usage.get("prompt_tokens", 0)
             stats["tokens_out"] += usage.get("completion_tokens", 0) + usage.get("completion_tokens_details", {}).get("reasoning_tokens", 0)
             if not isinstance(result.get("items"), list):
@@ -210,7 +219,9 @@ def main():
     ap.add_argument("--model", default="grok-4.7")
     ap.add_argument("--only", help="只处理一套，写成 游戏/名字，比如 tod/炸裂版")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--workers", type=int, default=6, help="同时处理几套")
+    ap.add_argument("--workers", type=int, default=2, help="同时处理几套")
+    ap.add_argument("--retries", type=int, default=0, help="失败后重试几次。默认不重试：超时的请求对方照样计费，重试等于重复花钱")
+    ap.add_argument("--max-usd", type=float, default=0.5, help="花费上限（美元）。只统计拿到结果的请求，超时的那一次不在内")
     a = ap.parse_args()
     data = json.loads(Path(a.src).read_text(encoding="utf-8"))
     assert data.get("format") == FORMAT, "不是题库文件"
@@ -229,7 +240,7 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
     new_decks, sections, summary = [], [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=a.workers) as ex:
-        results = list(ex.map(lambda d: review_deck(d, a.model), todo))
+        results = list(ex.map(lambda d: review_deck(d, a.model, a.retries, a.max_usd), todo))
     for d, (nd, rows, st) in zip(todo, results):
         new_decks.append(nd)
         title = "%s · %s" % (GAME_NAME[d["game"]], d["name"])
@@ -244,7 +255,7 @@ def main():
     (outdir / ("review-report%s.html" % suffix)).write_text(report_html(sections), encoding="utf-8")
     (outdir / ("review-summary%s.json" % suffix)).write_text(json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
     tin, tout = sum(s["tokens_in"] for s in summary), sum(s["tokens_out"] for s in summary)
-    print("完成。实际用量：输入 %d tokens，输出 %d tokens。失败 %d 套。" % (tin, tout, sum(1 for s in summary if s["failed"])))
+    print("完成。实际用量：输入 %d tokens，输出 %d tokens，拿到结果的请求共约 %.2f 美元。失败 %d 套。" % (tin, tout, SPENT["usd"], sum(1 for s in summary if s["failed"])))
 
 
 if __name__ == "__main__":
