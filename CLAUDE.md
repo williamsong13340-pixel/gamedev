@@ -79,3 +79,11 @@ python3 tools/imagegen.py --check
 - 全部工作在分支 `ccr-12c7c891-s3zgy9` 上（它也是仓库默认分支）。如果新会话的分支上没有这些文件，先 `git fetch origin ccr-12c7c891-s3zgy9` 再合并。
 - 尚未验证：Sunburst 是否支持透明背景（`background: transparent`）、`1536x1024` 尺寸、多张输入图（`image[]`）。
 - 待机呼吸、眨眼这类细微动作不要逐帧画，用一张图加代码轻微缩放和摆动来做（见 art-bible 第 6 节）。
+
+## 另一个小项目：情侣小游戏（`couple-games/`）
+
+- 用户买了一个情侣卡牌网站（只有网址和账号，改不了），bug 多、界面丑、玩法说不清，所以在 `couple-games/` 里重做。详情看 `couple-games/README.md`。
+- 这部分工作在分支 `ccr-e4d8b861-nce80w` 上。
+- 已完成：首页 + 心动卡牌（可完整玩）。还没做：真心话大冒险、双人飞行棋。
+- 用户要求：主要在手机上玩；线条柔和；用颜色分层级；规则要说得清楚。题库内容保持温和，露骨内容不要写。
+- 已发布的试玩页面：https://claude.ai/artifact/VLGakHNzeKzMNDzMX2Eydn （更新时发布同一个 `couple-games/src.html`，并带上这个 `url`）。
