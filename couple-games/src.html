@@ -1,0 +1,465 @@
+<title>情侣小游戏</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a one-screen phone app. The whole screen takes the colour of whoever's turn it is;
+   the one thing to do next is always the solid button at the bottom, within thumb reach. */
+:root{
+  --bg:#FDF1F4; --surface:#FFFFFF; --surface-2:#FFF9FA; --line:#F3DCE4;
+  --ink:#3B2140; --ink-2:#7B5F7E; --ink-3:#B49CB5;
+  --rose:#E4507A; --rose-soft:#FCDDE6; --rose-wash:#FDEAF0;
+  --iris:#7468DB; --iris-soft:#E3E0FA; --iris-wash:#EFEDFC;
+  --do:#EF7F4C; --do-soft:#FFE4D6; --say:#1E9E91; --say-soft:#D5F2EE; --wow:#D9940F; --wow-soft:#FCEDC4;
+  --on-accent:#FFFFFF; --shadow:0 12px 32px rgba(125,60,95,.16); --shadow-s:0 4px 14px rgba(125,60,95,.10);
+  --font:-apple-system,"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Microsoft YaHei","WenQuanYi Zen Hei",system-ui,sans-serif;
+  --font-num:ui-rounded,"SF Pro Rounded","Nunito",var(--font);
+  --r-l:28px; --r-m:20px; --r-s:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1B1120; --surface:#2B1C31; --surface-2:#231629; --line:#402C47;
+  --ink:#F8EAF2; --ink-2:#CBB0C9; --ink-3:#8C708B;
+  --rose:#FF7FA0; --rose-soft:#4B2236; --rose-wash:#291423;
+  --iris:#A89DFF; --iris-soft:#302B58; --iris-wash:#1C1933;
+  --do:#FF9E73; --do-soft:#4A2A1D; --say:#5FD2C4; --say-soft:#163F3A; --wow:#F6C352; --wow-soft:#483913;
+  --on-accent:#26121F; --shadow:0 12px 32px rgba(0,0,0,.45); --shadow-s:0 4px 14px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B1120; --surface:#2B1C31; --surface-2:#231629; --line:#402C47;
+  --ink:#F8EAF2; --ink-2:#CBB0C9; --ink-3:#8C708B;
+  --rose:#FF7FA0; --rose-soft:#4B2236; --rose-wash:#291423;
+  --iris:#A89DFF; --iris-soft:#302B58; --iris-wash:#1C1933;
+  --do:#FF9E73; --do-soft:#4A2A1D; --say:#5FD2C4; --say-soft:#163F3A; --wow:#F6C352; --wow-soft:#483913;
+  --on-accent:#26121F; --shadow:0 12px 32px rgba(0,0,0,.45); --shadow-s:0 4px 14px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--wash,var(--bg));color:var(--ink);font:16px/1.55 var(--font);transition:background-color .5s ease;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:hidden}
+body[data-turn="0"]{--wash:var(--rose-wash);--pc:var(--rose);--pc-soft:var(--rose-soft)}
+body[data-turn="1"]{--wash:var(--iris-wash);--pc:var(--iris);--pc-soft:var(--iris-soft)}
+button,input,textarea{font:inherit;color:inherit}
+button{border:0;background:none;padding:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--iris);outline-offset:3px}
+h1,h2,h3,p{margin:0}
+svg.i{width:1em;height:1em;fill:currentColor;flex:none}
+
+#app{max-width:460px;height:100%;margin:0 auto}
+.screen{height:100%;display:flex;flex-direction:column;gap:16px;padding-block:14px 18px;overflow-y:auto;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen>*{flex-shrink:0}
+.screen>.grow{flex:1 1 0;min-height:0}
+.screen>.stage{min-height:170px}
+
+/* buttons: one solid per screen, the rest quiet */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:0 20px;border-radius:var(--r-m);
+  background:var(--pc,var(--rose));color:var(--on-accent);font-weight:700;font-size:18px;box-shadow:0 8px 20px color-mix(in srgb,var(--pc,var(--rose)) 35%,transparent);transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.quiet{background:none;color:var(--ink-2);box-shadow:none;min-height:46px;font-size:15px;font-weight:600}
+.btn.soft{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-s)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.iconbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--ink-2);background:var(--surface);box-shadow:var(--shadow-s)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--ink-2)}
+.bar{display:flex;align-items:center;gap:12px}
+.bar h2{flex:1;text-align:center;font-size:17px;font-weight:700}
+.bar .spacer{width:44px}
+
+/* home */
+.hero{position:relative;padding:22px 4px 6px;min-height:168px}
+.hero h1{font-size:38px;line-height:1.15;font-weight:800;letter-spacing:.02em;margin-top:6px}
+.hero p{margin-top:10px;color:var(--ink-2);max-width:13em}
+.duo{position:absolute;right:-6px;top:8px;width:150px;height:150px;pointer-events:none}
+.duo i{position:absolute;width:96px;height:96px;border-radius:50%}
+.duo i:first-child{left:0;top:10px;background:var(--rose);opacity:.85;animation:bob 5s ease-in-out infinite}
+.duo i:last-child{right:0;bottom:6px;background:var(--iris);opacity:.8;mix-blend-mode:multiply;animation:bob 5s ease-in-out -2.5s infinite}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .duo i:last-child{mix-blend-mode:screen}}
+:root[data-theme="dark"] .duo i:last-child{mix-blend-mode:screen}
+@keyframes bob{50%{transform:translateY(-7px)}}
+.game-main{background:var(--surface);border-radius:var(--r-l);padding:22px 20px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.game-main h3{font-size:24px;font-weight:800}
+.game-main p{color:var(--ink-2)}
+.fanmini{display:flex;gap:8px}
+.fanmini span{flex:1;height:8px;border-radius:99px}
+.soon{display:flex;flex-direction:column;gap:10px}
+.soon li{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-m);background:var(--surface-2);color:var(--ink-2)}
+.soon b{color:var(--ink);font-weight:700}
+.soon em{margin-left:auto;font-style:normal;font-size:12px;padding:4px 10px;border-radius:99px;background:var(--line);color:var(--ink-2);white-space:nowrap}
+ul,ol{margin:0;padding:0}
+.fine{font-size:12.5px;color:var(--ink-3);text-align:center}
+
+/* setup */
+.field{display:flex;flex-direction:column;gap:10px}
+.field>label,.field>.lab{font-size:14px;font-weight:700;color:var(--ink-2)}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.name{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r-s);padding:0 14px;height:52px;box-shadow:var(--shadow-s)}
+.name i{width:14px;height:14px;border-radius:50%;flex:none}
+.name input{border:0;background:none;outline:0;width:100%;min-width:0;font-weight:700;font-size:17px}
+.name:focus-within{outline:3px solid var(--iris);outline-offset:2px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;text-align:left;padding:12px 14px;border-radius:var(--r-m);background:var(--surface-2);border:2px solid transparent;transition:background-color .2s,border-color .2s}
+.opt b{font-size:17px}
+.opt small{flex-basis:100%;color:var(--ink-2);font-size:12.5px;line-height:1.4}
+.opt .heat{margin-left:auto;display:flex;gap:2px;font-size:15px;color:var(--line)}
+.opt .heat .on{color:var(--rose)}
+.opt[aria-checked="true"]{background:var(--surface);border-color:var(--rose);box-shadow:var(--shadow-s)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{padding:10px 4px;border-radius:var(--r-s);background:var(--surface-2);border:2px solid transparent;line-height:1.3}
+.seg b{display:block;font:800 20px var(--font-num)}
+.seg small{font-size:12px;color:var(--ink-2)}
+.seg button[aria-checked="true"]{background:var(--surface);border-color:var(--rose);box-shadow:var(--shadow-s)}
+
+/* game */
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pl{--c:var(--rose);border-radius:var(--r-m);padding:10px 12px;background:color-mix(in srgb,var(--surface) 55%,transparent);opacity:.72;transition:all .35s;min-width:0}
+.pl[data-p="1"]{--c:var(--iris)}
+.pl.on{background:var(--surface);opacity:1;box-shadow:var(--shadow-s),inset 0 0 0 2px var(--c)}
+.pl .n{display:flex;align-items:center;gap:6px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .n i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.pl .n span{margin-left:auto;font:800 17px var(--font-num);color:var(--c)}
+.hearts{display:grid;grid-template-columns:repeat(var(--cols,7),1fr);gap:3px;margin-top:6px;max-width:150px}
+.hearts svg{width:100%;height:auto;aspect-ratio:1;fill:var(--line);transition:fill .3s}
+.hearts svg.on{fill:var(--c)}
+.hearts svg.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.5)}100%{transform:scale(1)}}
+.pl .sk{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.turn{text-align:center}
+.turn .eyebrow{display:block}
+.turn b{font-size:28px;font-weight:800;color:var(--pc);line-height:1.25}
+.stage{display:grid;place-items:center;perspective:1200px}
+.hand{display:flex;justify-content:center;gap:10px;width:100%;align-items:center}
+.back{flex:1;max-width:118px;aspect-ratio:5/7;border-radius:var(--r-m);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  color:var(--on-accent);font-weight:700;font-size:14px;box-shadow:var(--shadow);background:var(--tc);transition:transform .25s;animation:dealin .45s backwards}
+.back::before{content:"";position:absolute;inset:7px;border-radius:14px;border:1.5px dashed color-mix(in srgb,var(--on-accent) 55%,transparent)}
+.back svg{font-size:34px}
+.back:nth-child(1){transform:rotate(-5deg) translateY(6px)}
+.back:nth-child(2){animation-delay:.07s}
+.back:nth-child(3){transform:rotate(5deg) translateY(6px);animation-delay:.14s}
+.back:active{transform:scale(.95)}
+@keyframes dealin{from{opacity:0;translate:0 40px}}
+.t-d{--tc:var(--do);--tc-soft:var(--do-soft)} .t-s{--tc:var(--say);--tc-soft:var(--say-soft)} .t-w{--tc:var(--wow);--tc-soft:var(--wow-soft)}
+.flip{height:min(100%,400px);aspect-ratio:5/7;max-width:100%;position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.3,.5,1);transform:rotateY(180deg)}
+.flip.open{transform:none}
+.flip>*{position:absolute;inset:0;border-radius:var(--r-l);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip .rear{background:var(--tc);transform:rotateY(180deg);box-shadow:var(--shadow)}
+.face{background:var(--surface);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:8px;container-type:inline-size;overflow:hidden}
+.face::after{content:"";position:absolute;inset:auto 0 0 0;height:8px;background:var(--tc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:12.5px;font-weight:700;background:var(--tc-soft);color:var(--tc)}
+.chip.who{background:var(--pc-soft);color:var(--pc)}
+.face .txt{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:clamp(14px,9cqi,25px);line-height:1.5;font-weight:600;text-wrap:pretty}
+.face .txt strong{display:block;font-size:.72em;color:var(--tc);margin-bottom:.3em;letter-spacing:.08em}
+.face .txt b{color:var(--pc)}
+.face .rw{align-self:flex-end;display:flex;align-items:center;gap:4px;font:800 17px var(--font-num);color:var(--pc);padding-bottom:6px}
+.acts{display:flex;flex-direction:column;gap:4px;min-height:106px;justify-content:flex-end}
+.legend{display:flex;justify-content:center;gap:8px;padding-bottom:18px}
+.legend .chip{font-size:13px;padding:6px 12px}
+
+/* win */
+.win{align-items:stretch;justify-content:center;text-align:center}
+.win .big{font-size:40px;font-weight:800;color:var(--pc);line-height:1.2}
+.win .wish{background:var(--surface);border-radius:var(--r-l);padding:22px;box-shadow:var(--shadow);font-size:18px}
+.win .wish b{color:var(--pc)}
+.burst{height:120px;position:relative}
+.burst svg{position:absolute;left:50%;top:50%;fill:var(--pc);width:64px;height:64px;margin:-32px;animation:pop .7s cubic-bezier(.3,1.6,.5,1)}
+.burst svg+svg{width:26px;height:26px;margin:-52px 0 0 34px;opacity:.6;animation-delay:.15s;animation-fill-mode:backwards}
+.burst svg+svg+svg{margin:6px 0 0 -70px;width:20px;height:20px;fill:var(--wow);animation-delay:.3s}
+
+/* sheets + toast */
+.veil{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fade .2s}
+:root[data-theme="dark"] .veil{background:rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .veil{background:rgba(0,0,0,.6)}}
+.sheet{width:100%;max-width:492px;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:var(--r-l) var(--r-l) 0 0;display:flex;flex-direction:column;gap:14px;
+  padding:22px max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));animation:up .3s cubic-bezier(.2,1,.4,1)}
+.sheet h3{font-size:22px;font-weight:800}
+.steps{display:flex;flex-direction:column;gap:10px;counter-reset:s}
+.steps li{list-style:none;display:flex;gap:12px;background:var(--surface);padding:14px;border-radius:var(--r-m)}
+.steps li::before{counter-increment:s;content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--rose-soft);color:var(--rose);font:800 15px var(--font-num)}
+.steps .chips{margin-top:6px}
+textarea{width:100%;min-height:190px;border:0;border-radius:var(--r-m);background:var(--surface);padding:14px;resize:vertical;line-height:1.7}
+.hint{font-size:13px;color:var(--ink-2)}
+@keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(40%);opacity:0}}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);transform:translate(-50%,220px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:30;transition:transform .35s cubic-bezier(.2,1.2,.4,1);white-space:nowrap;pointer-events:none}
+#toast.show{transform:translate(-50%,0)}
+@media (max-height:700px){.turn b{font-size:22px}.acts{min-height:92px}.btn{min-height:50px}.hero{min-height:132px;padding-top:10px}.hero h1{font-size:32px}.hero p{display:none}.screen{gap:10px}
+  .pl .sk{display:none}.face{padding:12px;gap:6px}.face .chip{font-size:11px;padding:3px 8px}.face .rw{font-size:15px}.legend{padding-bottom:10px}.game-main{padding:18px 18px 16px;gap:10px}.duo{transform:scale(.8);transform-origin:top right}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5C5.5 16 2.5 12.6 2.5 8.9 2.5 6.2 4.6 4 7.3 4c1.9 0 3.6 1 4.7 2.6C13.1 5 14.8 4 16.7 4c2.7 0 4.8 2.2 4.8 4.9 0 3.7-3 7.1-9.5 11.6z"/></symbol>
+  <symbol id="i-d" viewBox="0 0 24 24"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zm-2 5.6 6 3.9-6 3.9z"/></symbol>
+  <symbol id="i-s" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.6 4.2V16A2.5 2.5 0 0 1 4 13.5z"/></symbol>
+  <symbol id="i-w" viewBox="0 0 24 24"><path d="M11 2.5l2.3 6.2 6.2 2.3-6.2 2.3L11 19.5l-2.3-6.2L2.5 11l6.2-2.3zM19 15l.9 2.1 2.1.9-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.7 5.3a1.2 1.2 0 0 1 0 1.7L9.7 12l5 5a1.2 1.2 0 1 1-1.7 1.7l-5.9-5.8a1.2 1.2 0 0 1 0-1.7l5.9-5.9a1.2 1.2 0 0 1 1.7 0z"/></symbol>
+  <symbol id="i-q" viewBox="0 0 24 24"><path d="M12 3.2c-2.9 0-4.9 1.8-5.2 4.3a1.2 1.2 0 0 0 2.4.3c.2-1.3 1.2-2.2 2.8-2.2 1.5 0 2.6.9 2.6 2.2 0 1-.5 1.6-1.7 2.4-1.5 1-2.2 2-2.2 3.6v.4a1.2 1.2 0 0 0 2.4 0v-.3c0-.8.3-1.2 1.3-1.9 1.7-1.1 2.6-2.4 2.6-4.3 0-2.6-2.1-4.5-5-4.5zM11.9 17.8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></symbol>
+</defs></svg>
+
+<main id="app">
+  <section class="screen" data-screen="home">
+    <div class="hero">
+      <div class="duo" aria-hidden="true"><i></i><i></i></div>
+      <span class="eyebrow">两个人 · 一部手机</span>
+      <h1>情侣<br>小游戏</h1>
+      <p>放下别的事，认真陪对方玩一会儿。</p>
+    </div>
+    <div class="game-main">
+      <div class="fanmini" aria-hidden="true"><span style="background:var(--do)"></span><span style="background:var(--say)"></span><span style="background:var(--wow)"></span></div>
+      <h3>心动卡牌</h3>
+      <p>轮流翻牌，做牌上的小事集心。先集满的人，可以向对方许一个愿望。</p>
+      <button class="btn" id="go-setup">开始玩</button>
+      <button class="btn quiet" id="go-resume" hidden>继续上一局</button>
+    </div>
+    <ul class="soon">
+      <li><b>真心话大冒险</b><em>下一步做</em></li>
+      <li><b>双人飞行棋</b><em>下一步做</em></li>
+    </ul>
+    <div class="grow"></div>
+    <p class="fine">所有内容只存在这部手机里，不会上传到任何地方。</p>
+  </section>
+
+  <section class="screen" data-screen="setup" hidden>
+    <div class="bar"><button class="iconbtn" data-go="home" aria-label="返回首页"><svg class="i"><use href="#i-back"/></svg></button><h2>开一局心动卡牌</h2><span class="spacer"></span></div>
+    <div class="field"><span class="lab">你们的昵称</span>
+      <div class="names">
+        <label class="name"><i style="background:var(--rose)"></i><input id="name-a" maxlength="6" placeholder="桃桃" autocomplete="off" aria-label="第一位的昵称"></label>
+        <label class="name"><i style="background:var(--iris)"></i><input id="name-b" maxlength="6" placeholder="阿蓝" autocomplete="off" aria-label="第二位的昵称"></label>
+      </div>
+    </div>
+    <div class="field"><span class="lab">选一副牌</span><div class="opts" id="decks" role="radiogroup" aria-label="牌组"></div>
+      <button class="btn quiet" id="edit-custom" style="min-height:32px;font-size:14px">编辑专属卡牌</button></div>
+    <div class="field"><span class="lab">集满几颗心算赢</span><div class="seg" id="goals" role="radiogroup" aria-label="目标"></div></div>
+    <div class="grow"></div>
+    <button class="btn" id="start">开始</button>
+  </section>
+
+  <section class="screen" data-screen="game" hidden>
+    <div class="bar"><button class="iconbtn" data-go="home" aria-label="回首页，进度会保存"><svg class="i"><use href="#i-back"/></svg></button><h2 id="deck-name"></h2><button class="iconbtn" id="open-rules" aria-label="怎么玩"><svg class="i"><use href="#i-q"/></svg></button></div>
+    <div class="score" id="score"></div>
+    <div class="turn"><span class="eyebrow" id="turn-eyebrow">轮到</span><b id="turn-name"></b></div>
+    <div class="stage grow" id="stage"></div>
+    <div class="acts" id="acts"></div>
+  </section>
+
+  <section class="screen win" data-screen="win" hidden>
+    <div class="burst" aria-hidden="true"><svg><use href="#i-heart"/></svg><svg><use href="#i-heart"/></svg><svg><use href="#i-w"/></svg></div>
+    <div><span class="eyebrow">这一局</span><div class="big" id="win-name"></div></div>
+    <p class="wish" id="win-wish"></p>
+    <p class="fine" id="win-stat"></p>
+    <button class="btn" id="again">再来一局</button>
+    <button class="btn quiet" data-go="home">回首页</button>
+  </section>
+</main>
+
+<div class="veil" id="rules" hidden><div class="sheet" role="dialog" aria-labelledby="rules-h">
+  <h3 id="rules-h">怎么玩</h3>
+  <ol class="steps">
+    <li><div>轮到谁，谁从三张盖着的牌里<b>翻一张</b>。牌背的颜色告诉你是哪一类：
+      <div class="chips"><span class="chip t-d"><svg class="i"><use href="#i-d"/></svg>行动</span><span class="chip t-s"><svg class="i"><use href="#i-s"/></svg>真心话</span><span class="chip t-w"><svg class="i"><use href="#i-w"/></svg>惊喜</span></div></div></li>
+    <li><div>照牌上写的做。做完得<b>一颗心</b>；写着“两人一起”的，两个人各得一颗。</div></li>
+    <li><div>不想做可以<b>跳过</b>，每人每局三次，跳过不得心。先集满心的人赢，可以向对方<b>许一个愿望</b>。</div></li>
+  </ol>
+  <button class="btn" data-close>知道了</button>
+</div></div>
+
+<div class="veil" id="custom" hidden><div class="sheet" role="dialog" aria-labelledby="custom-h">
+  <h3 id="custom-h">我们的专属卡牌</h3>
+  <p class="hint">一行就是一张牌，写你们自己才懂的小事。写上 {ta} 的地方，会自动换成对方的昵称。至少写 6 行才能选这副牌。</p>
+  <textarea id="custom-text" placeholder="带{ta}去吃第一次约会的那家店&#10;给{ta}讲一个睡前故事" aria-label="专属卡牌内容"></textarea>
+  <button class="btn" id="save-custom">保存</button>
+  <button class="btn quiet" data-close>取消</button>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const icon = (id, cls = 'i') => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', cls); const u = document.createElementNS('http://www.w3.org/2000/svg', 'use'); u.setAttribute('href', '#' + id); s.append(u); return s; };
+
+/* ---------- 题库：想改内容，改这里就行。d=行动 s=真心话 b=两人一起 ---------- */
+const d = t => ({ t: 'd', who: 'me', text: t }), s = t => ({ t: 's', who: 'me', text: t }), b = t => ({ t: 'd', who: 'both', text: t });
+const DECKS = {
+  first: { name: '初见', sub: '轻松聊聊天，适合热身', heat: 1, cards: [
+    s('说说你第一次见到{ta}时，心里在想什么。'), s('{ta}做过的哪件小事，你到现在都记得？'), s('用三个词形容{ta}，再说说为什么。'),
+    s('你最喜欢和{ta}一起做的一件事是什么？'), s('说一个你一直想和{ta}一起去的地方。'), s('最近一次被{ta}感动，是什么时候？'),
+    s('说一个{ta}自己可能都没发现的优点。'), s('如果明天放一天假，你想和{ta}怎么过？'), s('你觉得你们俩最像的地方是什么？'),
+    s('说一首会让你想起{ta}的歌，哼两句。'), s('{ta}的哪个小习惯最可爱？'), s('说一件你想为{ta}学会的事。'),
+    s('说出{ta}最爱吃的三样东西，看看对不对。'), s('小时候的你，想象中的另一半是什么样的？'),
+    d('学{ta}平时说话的样子，说一句话。'), d('给{ta}倒一杯水，或者拿一样零食。'), d('认真看着{ta}的眼睛 10 秒，不许笑。'),
+    d('夸{ta}三句，不能重复。'), d('用手比一个爱心，送给{ta}。'),
+    b('击掌三次，然后一起说“合作愉快”。'), b('拍一张合照，两个人表情要一样。'), b('数到三，同时说出今晚想吃什么。'),
+    b('石头剪刀布三局两胜，输的人给赢的人捶背 10 下。'), b('互相说一句今天还没来得及说的话。') ] },
+  sweet: { name: '热恋', sub: '抱一抱、牵牵手，甜一点', heat: 2, cards: [
+    d('给{ta}一个 10 秒的拥抱。'), d('牵起{ta}的手，十指相扣 30 秒。'), d('亲一下{ta}的额头。'), d('给{ta}捏肩膀 1 分钟。'),
+    d('在{ta}手心里写三个字，让 TA 猜。'), d('用最温柔的声音叫{ta}的名字三遍。'), d('从背后抱住{ta}，数到 15。'),
+    d('给{ta}唱一句情歌，跑调也算。'), d('亲一下{ta}的脸颊。'), d('帮{ta}整理一下头发。'), d('对{ta}说一句土味情话。'),
+    d('把{ta}抱起来 5 秒；抱不动就抱紧 10 秒。'),
+    s('说出你最心动的一次约会。'), s('你是什么时候确定自己喜欢上{ta}的？'), s('说一件你希望{ta}多对你做的事。'),
+    s('如果给{ta}写一封信，第一句你会写什么？'), s('{ta}身上你最喜欢的地方是哪里？'), s('说一个你们以后一定要一起完成的小目标。'),
+    s('闹别扭之后，你最希望{ta}怎么哄你？'), s('说出三个你觉得很幸福的瞬间。'),
+    b('额头贴着额头，一起闭眼 10 秒。'), b('面对面拥抱，同时说“有你真好”。'), b('互相喂对方吃一口东西。'), b('一起慢慢跳 20 秒的舞，没有音乐就自己哼。') ] },
+  night: { name: '深夜', sub: '靠近一点，心跳快一点', heat: 3, cards: [
+    d('在{ta}耳边说一句只有你们俩懂的悄悄话。'), d('亲吻{ta}的手背，像电影里那样。'), d('用指尖在{ta}的后背写一个字，让 TA 猜。'),
+    d('给{ta}一个 5 秒的吻。'), d('闭上眼睛，让{ta}亲你一下，猜猜亲的是哪边脸颊。'), d('抱着{ta}，听 TA 的心跳 20 秒。'),
+    d('给{ta}按摩手掌 1 分钟。'), d('靠在{ta}肩上，说一句撒娇的话。'), d('亲一下{ta}的鼻尖。'),
+    d('把{ta}的手放在你的心口，问 TA 感觉到了什么。'), d('给{ta}一个从轻到紧的拥抱，持续 20 秒。'), d('捧着{ta}的脸，认真说一句“我喜欢你”。'),
+    s('说一个{ta}让你脸红心跳的瞬间。'), s('你觉得{ta}什么时候最有魅力？'), s('说一个你还没告诉过{ta}的小秘密。'),
+    s('{ta}的哪个眼神最让你招架不住？'), s('说一句你一直想对{ta}说、但有点不好意思的话。'), s('如果今晚的时间可以停住，你想停在哪一刻？'),
+    s('你最喜欢{ta}怎么叫你？'), s('说说你理想中和{ta}一起度过的一个夜晚。'),
+    b('对视 30 秒，谁先笑，谁亲对方一下。'), b('关掉一盏灯，抱在一起安静 30 秒。'), b('十指相扣，轮流说一句“我喜欢你，因为……”。'), b('一起许一个只属于你们两个人的约定。') ] },
+  custom: { name: '专属', sub: '你们自己写的牌', heat: 0, cards: [] },
+};
+const WOW = [
+  { t: 'w', who: 'me', title: '双倍心动', hearts: 2, text: '给{ta}一个大大的拥抱，再说一句“遇见你真好”。' },
+  { t: 'w', who: 'me', title: '双倍心动', hearts: 2, text: '和{ta}一起唱一段你们都会的歌。' },
+  { t: 'w', who: 'me', title: '偷心', fx: 'steal', text: '从{ta}那里拿走一颗心。TA 还没有心的话，你直接得一颗。' },
+  { t: 'w', who: 'both', title: '小小心愿', text: '向{ta}提一个 1 分钟内能做到的小要求。TA 做到了，你们各得一颗心。' },
+];
+const TYPE = { d: { name: '行动', done: '做完了' }, s: { name: '真心话', done: '说完了' }, w: { name: '惊喜', done: '完成了' } };
+const GOALS = [[5, '约 10 分钟'], [7, '约 20 分钟'], [10, '约 30 分钟']];
+const SKIPS = 3, MIN_CUSTOM = 6;
+
+/* ---------- 存档（只在本机） ---------- */
+const KEY = 'couple-games-v1';
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ P, G })); } catch (e) {} };
+let P = { names: ['', ''], deckId: 'sweet', goal: 7, custom: '', seenRules: false };   // 设置
+let G = null;                                                                        // 当前这一局
+
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const customLines = () => P.custom.split('\n').map(x => x.trim()).filter(Boolean);
+const deckCards = id => (id === 'custom' ? customLines().map(d) : DECKS[id].cards).concat(WOW);
+const names = () => [P.names[0].trim() || '桃桃', P.names[1].trim() || '阿蓝'];
+
+/* ---------- 切换页面 ---------- */
+function go(name) {
+  $$('.screen').forEach(x => x.hidden = x.dataset.screen !== name);
+  if (name === 'game' || name === 'win') document.body.dataset.turn = name === 'win' ? G.winner : G.turn; else delete document.body.dataset.turn;
+  if (name === 'home') $('#go-resume').hidden = !(G && G.winner == null);
+  if (name === 'setup') renderSetup();
+  if (name === 'game') renderGame(true);
+  if (name === 'win') renderWin();
+  screen = name;
+}
+let screen = 'home', toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+const openSheet = id => { $(id).hidden = false; };
+$$('.veil').forEach(v => v.addEventListener('click', e => { if (e.target === v || e.target.closest('[data-close]')) v.hidden = true; }));
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
+
+/* ---------- 开局设置 ---------- */
+function renderSetup() {
+  $('#name-a').value = P.names[0]; $('#name-b').value = P.names[1];
+  const n = customLines().length, box = $('#decks'); box.replaceChildren();
+  if (P.deckId === 'custom' && n < MIN_CUSTOM) P.deckId = 'sweet';
+  for (const [id, dk] of Object.entries(DECKS)) {
+    const o = el('button', 'opt'); o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', P.deckId === id);
+    const sub = el('small', '', id !== 'custom' ? dk.sub : n >= MIN_CUSTOM ? `${dk.sub} · ${n} 张` : '还没写够，点这里写');
+    const heat = el('span', 'heat'); heat.setAttribute('aria-label', dk.heat ? `亲密程度 ${dk.heat} / 3` : '');
+    for (let i = 1; i <= 3 && dk.heat; i++) heat.append(icon('i-heart', 'i' + (i <= dk.heat ? ' on' : '')));
+    o.append(el('b', '', dk.name), heat, sub); o.onclick = () => { if (id === 'custom' && n < MIN_CUSTOM) return editCustom(); P.deckId = id; save(); renderSetup(); }; box.append(o);
+  }
+  const gs = $('#goals'); gs.replaceChildren();
+  for (const [g, time] of GOALS) {
+    const o = el('button'); o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', P.goal === g);
+    o.append(el('b', '', g + ' 颗'), el('small', '', time)); o.onclick = () => { P.goal = g; save(); renderSetup(); }; gs.append(o);
+  }
+}
+['a', 'b'].forEach((k, i) => $('#name-' + k).addEventListener('input', e => { P.names[i] = e.target.value; save(); }));
+const editCustom = () => { $('#custom-text').value = P.custom; openSheet('#custom'); };
+$('#edit-custom').onclick = editCustom;
+$('#save-custom').onclick = () => {
+  P.custom = $('#custom-text').value; const n = customLines().length; save(); $('#custom').hidden = true; renderSetup();
+  toast(n >= MIN_CUSTOM ? `已保存 ${n} 张专属卡牌` : `已保存。再写 ${MIN_CUSTOM - n} 行就能选这副牌`);
+};
+
+/* ---------- 一局游戏 ---------- */
+function newGame() {
+  G = { names: names(), deckId: P.deckId, deckName: DECKS[P.deckId].name, goal: P.goal, hearts: [0, 0], skips: [SKIPS, SKIPS],
+        turn: Math.random() < .5 ? 0 : 1, deck: shuffle(deckCards(P.deckId)), pile: [], hand: [], card: null, drawn: 0, winner: null };
+  deal(); save(); go('game');
+  if (!P.seenRules) { P.seenRules = true; save(); openSheet('#rules'); } else toast(`${G.names[G.turn]} 先翻牌`);
+}
+function deal() {
+  if (G.deck.length < 3) { G.deck = G.deck.concat(shuffle(G.pile)); G.pile = []; toast('牌翻完一轮了，已重新洗牌'); }
+  G.hand = G.deck.splice(0, 3); G.card = null;
+}
+function pick(i) {
+  if (G.card) return;                                   // 防止连点
+  G.card = G.hand[i]; G.deck.push(...G.hand.filter((_, k) => k !== i)); G.hand = []; G.drawn++;
+  save(); renderGame();
+}
+function finish(done) {
+  const c = G.card; if (!c) return;
+  const me = G.turn, ta = 1 - me, gained = [];
+  if (done) {
+    if (c.fx === 'steal') { if (G.hearts[ta] > 0) G.hearts[ta]--; G.hearts[me]++; gained.push(me); }
+    else if (c.who === 'both') { G.hearts[0]++; G.hearts[1]++; gained.push(0, 1); }
+    else { G.hearts[me] = Math.min(G.goal, G.hearts[me] + (c.hearts || 1)); gained.push(me); }
+  } else G.skips[me]--;
+  G.pile.push(c); G.card = null;
+  const won = G.hearts[me] >= G.goal ? me : G.hearts[ta] >= G.goal ? ta : null;
+  if (won != null) { G.winner = won; save(); return go('win'); }
+  G.turn = ta; deal(); save(); document.body.dataset.turn = G.turn; renderGame(true, gained);
+}
+
+function fill(node, text, ta) {                          // 把 {ta} 换成对方昵称并加粗
+  text.split('{ta}').forEach((part, i) => { if (i) node.append(el('b', '', ta)); node.append(part); });
+}
+function renderGame(fresh, gained = []) {
+  const me = G.turn, ta = 1 - me;
+  $('#deck-name').textContent = G.deckName + ' · 集满 ' + G.goal + ' 颗心';
+  const sc = $('#score'); sc.replaceChildren();
+  G.names.forEach((n, p) => {
+    const box = el('div', 'pl' + (p === me ? ' on' : '')); box.dataset.p = p;
+    const nm = el('div', 'n'); nm.append(el('i'), n, el('span', '', G.hearts[p] + '/' + G.goal));
+    const hs = el('div', 'hearts'); hs.style.setProperty('--cols', G.goal === 10 ? 10 : G.goal);
+    for (let i = 0; i < G.goal; i++) hs.append(icon('i-heart', (i < G.hearts[p] ? 'on' : '') + (gained.includes(p) && i === G.hearts[p] - 1 ? ' pop' : '')));
+    box.append(nm, hs, el('div', 'sk', `还能跳过 ${G.skips[p]} 次`)); sc.append(box);
+  });
+  $('#turn-name').textContent = G.names[me];
+  const stage = $('#stage'), acts = $('#acts'); stage.replaceChildren(); acts.replaceChildren();
+  if (!G.card) {
+    $('#turn-eyebrow').textContent = '轮到 · 选一张牌翻开';
+    const hand = el('div', 'hand');
+    G.hand.forEach((c, i) => { const bk = el('button', 'back t-' + c.t); bk.append(icon('i-' + c.t), el('span', '', TYPE[c.t].name)); bk.setAttribute('aria-label', '翻开这张' + TYPE[c.t].name + '牌'); bk.onclick = () => pick(i); hand.append(bk); });
+    stage.append(hand);
+    const lg = el('div', 'legend'); for (const t of ['d', 's', 'w']) { const ch = el('span', 'chip t-' + t); ch.append(icon('i-' + t), TYPE[t].name); lg.append(ch); } acts.append(lg);
+    return;
+  }
+  const c = G.card, both = c.who === 'both', steal = c.fx === 'steal';
+  $('#turn-eyebrow').textContent = '轮到';
+  const flip = el('div', 'flip t-' + c.t), face = el('div', 'face');
+  const chips = el('div', 'chips'), tch = el('span', 'chip'); tch.append(icon('i-' + c.t), TYPE[c.t].name);
+  chips.append(tch, el('span', 'chip who', both ? '两人一起' : G.names[me] + ' 来'));
+  const txt = el('div', 'txt'); if (c.title) txt.append(el('strong', '', c.title)); const pp = el('span'); fill(pp, c.text, G.names[ta]); txt.append(pp);
+  const rw = el('div', 'rw'); rw.append(both ? '各 +1' : '+' + (c.hearts || 1), icon('i-heart'));
+  face.append(chips, txt, rw); flip.append(el('div', 'rear'), face); stage.append(flip);
+  requestAnimationFrame(() => requestAnimationFrame(() => flip.classList.add('open')));
+  const ok = el('button', 'btn'); ok.append(steal ? '收下这颗心' : TYPE[c.t].done, icon('i-heart')); ok.onclick = () => finish(true);
+  acts.append(ok);
+  if (!steal) { const sk = el('button', 'btn quiet', G.skips[me] > 0 ? `跳过这张（还剩 ${G.skips[me]} 次）` : '跳过次数用完了'); sk.disabled = G.skips[me] <= 0; sk.onclick = () => finish(false); acts.append(sk); }
+}
+function renderWin() {
+  const w = G.winner, l = 1 - w;
+  $('#win-name').textContent = G.names[w] + ' 赢了';
+  const p = $('#win-wish'); p.replaceChildren(); p.append(el('b', '', G.names[w]), ' 可以向 ', el('b', '', G.names[l]), ' 许一个愿望。说出来吧，TA 要认真完成。');
+  $('#win-stat').textContent = `这一局一共翻了 ${G.drawn} 张牌 · ${G.names[0]} ${G.hearts[0]} 颗心，${G.names[1]} ${G.hearts[1]} 颗心`;
+}
+
+$('#go-setup').onclick = () => go('setup');
+$('#go-resume').onclick = () => go('game');
+$('#start').onclick = newGame;
+$('#again').onclick = newGame;
+$('#open-rules').onclick = () => openSheet('#rules');
+
+function start(data) {
+  const sv = data && data.P ? data : load();
+  if (sv.P) P = Object.assign(P, sv.P);
+  if (sv.G && sv.G.winner == null && Array.isArray(sv.G.deck)) G = sv.G;
+  go(data && data.screen && (data.screen !== 'game' || G) && data.screen !== 'win' ? data.screen : 'home');
+}
+const hot = window.claude && window.claude.hot;
+if (hot && hot.snapshot) hot.snapshot(() => ({ P, G, screen }));
+if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+})();
+</script>
