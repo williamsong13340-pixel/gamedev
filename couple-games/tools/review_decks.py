@@ -27,34 +27,40 @@ API = "https://api.x.ai/v1/chat/completions"
 FORMAT = "couple-games-import-v1"
 GAME_NAME = {"cards": "心动卡牌", "tod": "真心话大冒险", "chess": "双人飞行棋"}
 REASONS = {"unsafe": "不安全", "one_sided": "偏向一方", "empty": "空的", "unclear": "看不懂",
-           "duplicate": "意思重复", "added": "补充的", "": ""}
+           "duplicate": "意思重复", "wrong_type": "分错类", "added": "补充的", "": ""}
 MIN_PER_TYPE = 12
 MAX_LEN = 60
 
-SYSTEM = """你是一款成年情侣互动游戏的内容编辑。使用者是一对自愿、私下一起玩的成年伴侣。
+SYSTEM = """你是一款成年情侣互动游戏的内容编辑。使用者是一对自愿、私下一起玩的成年伴侣，内容尺度由他们自己决定。
 下面给你一套卡牌，每条有编号 i 和类型 type（d=行动，s=真心话）。请逐条审查并给出处理结果。
 
-处理规则：
-1. 默认保留（keep）。只要没有下面列出的问题，就不要改动。
-2. 不安全（unsafe）：改写成安全的做法；实在改不了就删除（remove）。不安全是指：
-   - 有受伤风险：憋气、窒息、勒颈，烫伤或过冷，尖锐、易碎或不卫生的物品，容易摔倒或拉伤的姿势；
-   - 过量饮酒，或用喝酒当惩罚、强迫对方喝；
-   - 拍照、录像、发给别人、直播，或者在公开场合、可能被别人看到的地方进行；
-   - 一方没有办法拒绝或喊停，或者带有强迫、贬低人格的内容；
-   - 涉及两个人以外的其他人。
-3. 偏向一方（one_sided）：改写成“谁抽到谁做”、两个人都适用的写法。用“你”指抽到牌的人，
-   用“{ta}”指另一个人（请原样写出 {ta} 这四个字符，游戏会把它换成昵称）。不要写男方、女方、
-   男生、女生。如果原内容只适合某一种身体，就改成两个人都能做的等价玩法。
-4. 空的、无意义、看不懂、只是占位符（empty / unclear）：删除。
-5. 意思和前面某一条基本相同（duplicate）：删除后出现的那条。
-6. 改写时保持原来的尺度、语气和长度（不超过 40 个字），不要改得更保守，也不要改得更激烈；
-   保留原有的时间、次数这类具体要求。
-7. 真心话（s）必须是一个问题，或“说出……”这样的要求；行动（d）必须是马上能做的一件事。
-8. 处理完之后，如果某个类型剩下不到 __MIN__ 条（只针对这套里原本就有的类型），请在 add 里补充
-   同样风格、符合以上规则的新内容，补到 __MIN__ 条为止。不需要补就让 add 为空数组。
+最重要的原则：这套内容本身是好的，绝大多数应该原样保留（keep）。尺度大、直白、羞耻感强、
+涉及拍照或录像，都不是修改的理由。用词粗糙、有错别字、用拼音或谐音代替某些字，也不是修改的理由。
+只有下面几种情况才动：
+
+1. 会受伤（unsafe）：只指身体受伤的风险，包括憋气、窒息、勒颈；烫伤、冻伤；尖锐、易碎、不卫生
+   或不适合放进身体的物品；容易摔倒、拉伤、扭伤的姿势或动作；过量饮酒。除此之外都不算不安全。
+   处理方式是改写（rewrite）：只把会受伤的那一部分换成不会受伤的做法，其余文字尽量逐字保留；
+   实在改不了才删除（remove）。
+2. 偏向一方（one_sided）：整条内容只让固定的一方付出或只让固定的一方享受，而且写死了是男方或女方。
+   改写成“谁抽到谁做”、两个人都适用的写法：用“你”指抽到牌的人，用“{ta}”指另一个人（请原样写出
+   {ta} 这四个字符，游戏会把它换成昵称）。如果原内容只适合某一种身体，就改成两个人都能做的等价玩法。
+   只是提到了男方、女方，但两个人都参与的，不算偏向一方，保留。
+3. 空的、只有占位符、完全读不通（empty）：删除。
+4. 意思和前面某一条基本相同（duplicate）：删除后出现的那条。
+5. 分错类（wrong_type）：类型是真心话（s）但内容其实是要做的一件事，或者类型是行动（d）但内容其实是
+   一个要回答的问题。处理方式是换类型（retype），文字不改。
+
+改写的要求：
+- 改动越小越好，能只换几个字就只换几个字。
+- 尺度必须和原文完全一样：原文怎么直白，改后就怎么直白。绝对不能改得更含蓄、更温和、更保守。
+- 保留原有的时间、次数这类具体要求，长度不超过 40 个字。
+
+补充：处理完之后，如果某个类型剩下不到 __MIN__ 条（只针对这套里原本就有的类型），请在 add 里补充新内容，
+补到 __MIN__ 条为止。新内容的尺度、语气要和这一套里保留下来的内容一致，并且不会受伤。不需要补就让 add 为空数组。
 
 只输出一个 JSON 对象，不要输出别的文字：
-{"items":[{"i":编号,"action":"keep 或 rewrite 或 remove","reason":"unsafe / one_sided / empty / unclear / duplicate，保留时留空","text":"改写后的文字，只有 rewrite 时填写"}],
+{"items":[{"i":编号,"action":"keep 或 rewrite 或 remove 或 retype","reason":"unsafe / one_sided / empty / duplicate / wrong_type，保留时留空","text":"改写后的文字，只有 rewrite 时填写"}],
  "add":[{"type":"d 或 s","text":"……"}]}
 每个编号都必须出现且只出现一次。"""
 
@@ -84,7 +90,7 @@ def call(model, payload_items, timeout=900):
 def review_deck(deck, model, retries=2):
     """返回 (新牌组, 对照行, 统计)。出错时原样保留整套。"""
     items = [{"i": i, "type": t, "text": x} for i, (t, x) in enumerate([("d", x) for x in deck["d"]] + [("s", x) for x in deck["s"]])]
-    stats = {"total": len(items), "keep": 0, "rewrite": 0, "remove": 0, "add": 0, "missing": 0, "too_long": 0, "failed": False,
+    stats = {"total": len(items), "keep": 0, "rewrite": 0, "remove": 0, "retype": 0, "add": 0, "missing": 0, "too_long": 0, "failed": False,
              "reasons": {}, "tokens_in": 0, "tokens_out": 0, "seconds": 0, "attempts": 0}
     t0 = time.time()
     rows = []
@@ -140,16 +146,19 @@ def review_deck(deck, model, retries=2):
                 action = "remove"
             elif norm(new) == norm(it["text"]):
                 action, new, reason = "keep", it["text"], ""
+        elif action == "retype" and deck["d"] and deck["s"]:
+            reason = "wrong_type"
         elif action != "remove":
             action, reason = "keep", ""
+        tt = ("s" if it["type"] == "d" else "d") if action == "retype" else it["type"]
         if action != "remove" and norm(new) in seen:
             action, reason = "remove", "duplicate"
         if action == "remove":
             rows.append((it["type"], it["text"], "", "remove", reason or "unclear"))
         else:
             seen.add(norm(new))
-            out[it["type"]].append(new)
-            rows.append((it["type"], it["text"], new, action, reason))
+            out[tt].append(new)
+            rows.append((tt, "" if action == "retype" else it["text"], new, action, reason))
             if len(new) > MAX_LEN:
                 stats["too_long"] += 1
         stats[action] += 1
@@ -177,11 +186,11 @@ def report_html(sections):
     out = ["<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>",
            "<title>题库改动对照表</title><style>", css, "</style><h1>题库改动对照表</h1>",
            "<p>只列出被改写、删除、补充的条目；没列出来的都原样保留。划线的是原文，粗体是改后的。</p>"]
-    label = {"rewrite": "改写", "remove": "删除", "add": "补充"}
+    label = {"rewrite": "改写", "remove": "删除", "add": "补充", "retype": "换到这一类"}
     for title, rows, stats in sections:
         changed = [r for r in rows if r[3] != "keep"]
-        out.append("<h2>%s</h2><p>共 %d 条：保留 %d，改写 %d，删除 %d，补充 %d%s</p>" % (
-            html.escape(title), stats["total"], stats["keep"], stats["rewrite"], stats["remove"], stats["add"],
+        out.append("<h2>%s</h2><p>共 %d 条：保留 %d，改写 %d，删除 %d，换类型 %d，补充 %d%s</p>" % (
+            html.escape(title), stats["total"], stats["keep"], stats["rewrite"], stats["remove"], stats["retype"], stats["add"],
             "　<b>这一套处理失败，已原样保留</b>" if stats["failed"] else ""))
         for t, old, new, action, reason in changed:
             out.append("<div class='r'><span class='tag %s'>%s</span><span class='k'>%s%s</span>" % (
@@ -226,8 +235,8 @@ def main():
         title = "%s · %s" % (GAME_NAME[d["game"]], d["name"])
         sections.append((title, rows, st))
         summary.append({"deck": "%s/%s" % (d["game"], d["name"]), **st, "after": {"d": len(nd["d"]), "s": len(nd["s"])}})
-        print("%-22s 共%3d 保留%3d 改写%3d 删除%3d 补充%3d  现有 行动%3d 真心话%3d  %s" % (
-            d["game"] + "/" + d["name"], st["total"], st["keep"], st["rewrite"], st["remove"], st["add"], len(nd["d"]), len(nd["s"]),
+        print("%-22s 共%3d 保留%3d 改写%3d 删除%3d 换类%3d 补充%3d  现有 行动%3d 真心话%3d  %s" % (
+            d["game"] + "/" + d["name"], st["total"], st["keep"], st["rewrite"], st["remove"], st["retype"], st["add"], len(nd["d"]), len(nd["s"]),
             ("失败:" + str(st["failed"])) if st["failed"] else ("未回应%d条→保留" % st["missing"] if st["missing"] else "")) + " %ds/%d次" % (st["seconds"], st["attempts"]))
         sys.stdout.flush()
     suffix = "-trial" if a.only else ""
