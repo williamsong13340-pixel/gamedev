@@ -38,7 +38,7 @@ body[data-turn="1"]{--wash:var(--iris-wash);--pc:var(--iris);--pc-soft:var(--iri
 button,input,textarea{font:inherit;color:inherit}
 button{border:0;background:none;padding:0;cursor:pointer}
 :focus-visible{outline:3px solid var(--iris);outline-offset:3px}
-h1,h2,h3,p{margin:0}
+h1,h2,h3,p{margin:0} ul,ol{margin:0;padding:0}
 svg.i{width:1em;height:1em;fill:currentColor;flex:none}
 
 #app{max-width:460px;height:100%;margin:0 auto}
@@ -52,17 +52,18 @@ svg.i{width:1em;height:1em;fill:currentColor;flex:none}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:0 20px;border-radius:var(--r-m);
   background:var(--pc,var(--rose));color:var(--on-accent);font-weight:700;font-size:18px;box-shadow:0 8px 20px color-mix(in srgb,var(--pc,var(--rose)) 35%,transparent);transition:transform .12s}
 .btn:active{transform:scale(.97)}
+.btn.kind{background:var(--tc);box-shadow:0 8px 20px color-mix(in srgb,var(--tc) 35%,transparent)}
 .btn.quiet{background:none;color:var(--ink-2);box-shadow:none;min-height:46px;font-size:15px;font-weight:600}
 .btn.soft{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-s)}
 .btn[disabled]{opacity:.4;pointer-events:none}
 .iconbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--ink-2);background:var(--surface);box-shadow:var(--shadow-s)}
 .eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--ink-2)}
 .bar{display:flex;align-items:center;gap:12px}
-.bar h2{flex:1;text-align:center;font-size:17px;font-weight:700}
+.bar h2{flex:1;text-align:center;font-size:17px;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar .spacer{width:44px}
 
 /* home */
-.hero{position:relative;padding:22px 4px 6px;min-height:168px}
+.hero{position:relative;padding:22px 4px 6px;min-height:160px}
 .hero h1{font-size:38px;line-height:1.15;font-weight:800;letter-spacing:.02em;margin-top:6px}
 .hero p{margin-top:10px;color:var(--ink-2);max-width:13em}
 .duo{position:absolute;right:-6px;top:8px;width:150px;height:150px;pointer-events:none}
@@ -72,45 +73,47 @@ svg.i{width:1em;height:1em;fill:currentColor;flex:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .duo i:last-child{mix-blend-mode:screen}}
 :root[data-theme="dark"] .duo i:last-child{mix-blend-mode:screen}
 @keyframes bob{50%{transform:translateY(-7px)}}
-.game-main{background:var(--surface);border-radius:var(--r-l);padding:22px 20px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
-.game-main h3{font-size:24px;font-weight:800}
-.game-main p{color:var(--ink-2)}
-.fanmini{display:flex;gap:8px}
-.fanmini span{flex:1;height:8px;border-radius:99px}
-.soon{display:flex;flex-direction:column;gap:10px}
-.soon li{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-m);background:var(--surface-2);color:var(--ink-2)}
-.soon b{color:var(--ink);font-weight:700}
-.soon em{margin-left:auto;font-style:normal;font-size:12px;padding:4px 10px;border-radius:99px;background:var(--line);color:var(--ink-2);white-space:nowrap}
-ul,ol{margin:0;padding:0}
+.resume{align-self:flex-start;padding:10px 18px;border-radius:99px;background:var(--rose-soft);color:var(--rose);font-weight:700;font-size:14.5px}
+.games{display:flex;flex-direction:column;gap:12px}
+.g{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--r-l);background:var(--surface);box-shadow:var(--shadow-s);text-align:left;width:100%;transition:transform .12s}
+.g:active{transform:scale(.98)}
+.g .art{width:62px;height:62px;flex:none;border-radius:18px;background:var(--bg);padding:5px}
+.g span{flex:1;min-width:0}
+.g b{display:block;font-size:19px;font-weight:800}
+.g small{display:block;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.g .go{transform:rotate(180deg);color:var(--ink-3);font-size:20px}
 .fine{font-size:12.5px;color:var(--ink-3);text-align:center}
 
 /* setup */
 .field{display:flex;flex-direction:column;gap:10px}
-.field>label,.field>.lab{font-size:14px;font-weight:700;color:var(--ink-2)}
+.field>.lab{font-size:14px;font-weight:700;color:var(--ink-2)}
 .names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .name{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r-s);padding:0 14px;height:52px;box-shadow:var(--shadow-s)}
 .name i{width:14px;height:14px;border-radius:50%;flex:none}
 .name input{border:0;background:none;outline:0;width:100%;min-width:0;font-weight:700;font-size:17px}
 .name:focus-within{outline:3px solid var(--iris);outline-offset:2px}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.opt{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;text-align:left;padding:12px 14px;border-radius:var(--r-m);background:var(--surface-2);border:2px solid transparent;transition:background-color .2s,border-color .2s}
+.opt{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;text-align:left;padding:12px 14px;border-radius:var(--r-m);background:var(--surface-2);border:2px solid transparent;transition:background-color .2s,border-color .2s;min-width:0}
 .opt b{font-size:17px}
 .opt small{flex-basis:100%;color:var(--ink-2);font-size:12.5px;line-height:1.4}
 .opt .heat{margin-left:auto;display:flex;gap:2px;font-size:15px;color:var(--line)}
 .opt .heat .on{color:var(--rose)}
 .opt[aria-checked="true"]{background:var(--surface);border-color:var(--rose);box-shadow:var(--shadow-s)}
+.links{display:flex;justify-content:center;gap:4px}
+.links .btn{width:auto;min-height:34px;font-size:14px;padding:0 12px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .seg button{padding:10px 4px;border-radius:var(--r-s);background:var(--surface-2);border:2px solid transparent;line-height:1.3}
 .seg b{display:block;font:800 20px var(--font-num)}
 .seg small{font-size:12px;color:var(--ink-2)}
 .seg button[aria-checked="true"]{background:var(--surface);border-color:var(--rose);box-shadow:var(--shadow-s)}
 
-/* game */
+/* play: shared by the three games */
 .score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pl{--c:var(--rose);border-radius:var(--r-m);padding:10px 12px;background:color-mix(in srgb,var(--surface) 55%,transparent);opacity:.72;transition:all .35s;min-width:0}
 .pl[data-p="1"]{--c:var(--iris)}
 .pl.on{background:var(--surface);opacity:1;box-shadow:var(--shadow-s),inset 0 0 0 2px var(--c)}
-.pl .n{display:flex;align-items:center;gap:6px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score.idle .pl{opacity:1;background:var(--surface)}
+.pl .n{display:flex;align-items:center;gap:6px;font-weight:800;white-space:nowrap;overflow:hidden}
 .pl .n i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
 .pl .n span{margin-left:auto;font:800 17px var(--font-num);color:var(--c)}
 .hearts{display:grid;grid-template-columns:repeat(var(--cols,7),1fr);gap:3px;margin-top:6px;max-width:150px}
@@ -119,10 +122,26 @@ ul,ol{margin:0;padding:0}
 .hearts svg.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.5)}100%{transform:scale(1)}}
 .pl .sk{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.pl .meta{font-size:12.5px;color:var(--ink-2);margin-top:4px}
+.prog{height:8px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--c);transition:width .4s}
 .turn{text-align:center}
 .turn .eyebrow{display:block}
-.turn b{font-size:28px;font-weight:800;color:var(--pc);line-height:1.25}
+.turn b{font-size:28px;font-weight:800;color:var(--pc,var(--ink));line-height:1.25}
 .stage{display:grid;place-items:center;perspective:1200px}
+.t-d{--tc:var(--do);--tc-soft:var(--do-soft)} .t-s{--tc:var(--say);--tc-soft:var(--say-soft)} .t-w{--tc:var(--wow);--tc-soft:var(--wow-soft)}
+.acts{display:flex;flex-direction:column;gap:4px;min-height:106px;justify-content:flex-end}
+.acts .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts .rowx{display:flex;align-items:center;gap:14px}
+.acts .rowx .btn{flex:1;width:auto}
+.note{font-size:13px;color:var(--ink-2);text-align:center;min-height:46px;display:grid;place-items:center}
+.legend{display:flex;justify-content:center;gap:8px;padding-bottom:18px}
+.legend .chip{font-size:13px;padding:6px 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:12.5px;font-weight:700;background:var(--tc-soft);color:var(--tc)}
+.chip.who{background:var(--pc-soft);color:var(--pc)}
+
+/* cards */
 .hand{display:flex;justify-content:center;gap:10px;width:100%;align-items:center}
 .back{flex:1;max-width:118px;aspect-ratio:5/7;border-radius:var(--r-m);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
   color:var(--on-accent);font-weight:700;font-size:14px;box-shadow:var(--shadow);background:var(--tc);transition:transform .25s;animation:dealin .45s backwards}
@@ -133,23 +152,43 @@ ul,ol{margin:0;padding:0}
 .back:nth-child(3){transform:rotate(5deg) translateY(6px);animation-delay:.14s}
 .back:active{transform:scale(.95)}
 @keyframes dealin{from{opacity:0;translate:0 40px}}
-.t-d{--tc:var(--do);--tc-soft:var(--do-soft)} .t-s{--tc:var(--say);--tc-soft:var(--say-soft)} .t-w{--tc:var(--wow);--tc-soft:var(--wow-soft)}
 .flip{height:min(100%,400px);aspect-ratio:5/7;max-width:100%;position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.3,.5,1);transform:rotateY(180deg)}
 .flip.open{transform:none}
 .flip>*{position:absolute;inset:0;border-radius:var(--r-l);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .flip .rear{background:var(--tc);transform:rotateY(180deg);box-shadow:var(--shadow)}
 .face{background:var(--surface);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:8px;container-type:inline-size;overflow:hidden}
 .face::after{content:"";position:absolute;inset:auto 0 0 0;height:8px;background:var(--tc)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:12.5px;font-weight:700;background:var(--tc-soft);color:var(--tc)}
-.chip.who{background:var(--pc-soft);color:var(--pc)}
-.face .txt{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:clamp(14px,9cqi,25px);line-height:1.5;font-weight:600;text-wrap:pretty}
+.face .txt{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;font-size:clamp(14px,9cqi,25px);line-height:1.5;font-weight:600;text-wrap:pretty;padding-bottom:6px}
+.face .txt.long{font-size:clamp(13px,7cqi,19px)}
 .face .txt strong{display:block;font-size:.72em;color:var(--tc);margin-bottom:.3em;letter-spacing:.08em}
 .face .txt b{color:var(--pc)}
 .face .rw{align-self:flex-end;display:flex;align-items:center;gap:4px;font:800 17px var(--font-num);color:var(--pc);padding-bottom:6px}
-.acts{display:flex;flex-direction:column;gap:4px;min-height:106px;justify-content:flex-end}
-.legend{display:flex;justify-content:center;gap:8px;padding-bottom:18px}
-.legend .chip{font-size:13px;padding:6px 12px}
+
+/* truth or dare */
+.wheel{width:min(100%,260px);max-height:100%;aspect-ratio:1;border-radius:50%;position:relative;background:conic-gradient(var(--iris) 0 180deg,var(--rose) 180deg 360deg);box-shadow:var(--shadow),inset 0 0 0 9px var(--surface)}
+.wheel .nm{position:absolute;top:50%;translate:0 -50%;width:27%;text-align:center;color:var(--on-accent);font-weight:800;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.wheel .nm.l{left:7%} .wheel .nm.r{right:7%}
+.needle{position:absolute;left:50%;top:9%;width:26px;height:41%;margin-left:-13px;transform-origin:50% 100%;background:var(--surface);clip-path:polygon(50% 0,100% 100%,0 100%);transition:transform 2.4s cubic-bezier(.12,.75,.2,1)}
+.hub{position:absolute;inset:37%;border-radius:50%;background:var(--surface);box-shadow:var(--shadow-s);display:grid;place-items:center;font-weight:800;font-size:15px;color:var(--ink-2)}
+
+/* flight chess */
+.stage.cq{container-type:size}
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;width:min(100%,117cqh)}
+.cell{aspect-ratio:1;border-radius:24%;background:var(--tc-soft);color:var(--tc);position:relative;display:grid;place-items:center;font-weight:800;font-size:12.5px;line-height:1}
+.cell svg{font-size:17px;opacity:.85}
+.cell u{position:absolute;left:5px;top:4px;font:600 9px var(--font-num);text-decoration:none;color:var(--ink-3)}
+.cell.t-a,.cell.t-z{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-s);font-size:15px}
+.piece{position:absolute;bottom:-3px;width:46%;aspect-ratio:1;border-radius:50%;background:var(--c);border:2px solid var(--surface);box-shadow:0 3px 8px rgba(0,0,0,.25);z-index:2;display:grid;place-items:center;color:var(--on-accent);font-size:10px;font-weight:800}
+.piece[data-p="0"]{--c:var(--rose);left:-3px} .piece[data-p="1"]{--c:var(--iris);right:-3px}
+.piece.hop{animation:hop .18s}
+.piece.me{z-index:3;animation:pulse 1.4s ease-in-out infinite}
+@keyframes hop{50%{transform:translateY(-45%) scale(1.15)}}
+@keyframes pulse{50%{box-shadow:0 3px 8px rgba(0,0,0,.25),0 0 0 5px color-mix(in srgb,var(--c) 30%,transparent)}}
+.dice{width:60px;height:60px;flex:none;border-radius:18px;background:var(--surface);box-shadow:var(--shadow-s);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:11px;gap:3px}
+.dice i{border-radius:50%}
+.dice i.on{background:var(--pc,var(--rose))}
+.dice.rolling{animation:shake .12s linear infinite}
+@keyframes shake{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
 
 /* win */
 .win{align-items:stretch;justify-content:center;text-align:center}
@@ -165,20 +204,27 @@ ul,ol{margin:0;padding:0}
 .veil{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fade .2s}
 :root[data-theme="dark"] .veil{background:rgba(0,0,0,.6)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .veil{background:rgba(0,0,0,.6)}}
+.veil.mid{align-items:center;padding:16px}
+.cardbox{width:min(100%,330px);display:flex;flex-direction:column;gap:16px}
+.cardbox .slot{height:min(54vh,400px);display:grid;place-items:center;perspective:1200px}
+.cardbox .acts{min-height:0;gap:10px}
 .sheet{width:100%;max-width:492px;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:var(--r-l) var(--r-l) 0 0;display:flex;flex-direction:column;gap:14px;
   padding:22px max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));animation:up .3s cubic-bezier(.2,1,.4,1)}
 .sheet h3{font-size:22px;font-weight:800}
 .steps{display:flex;flex-direction:column;gap:10px;counter-reset:s}
 .steps li{list-style:none;display:flex;gap:12px;background:var(--surface);padding:14px;border-radius:var(--r-m)}
 .steps li::before{counter-increment:s;content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--rose-soft);color:var(--rose);font:800 15px var(--font-num)}
-.steps .chips{margin-top:6px}
+.steps .chips{margin:6px 0 2px}
 textarea{width:100%;min-height:190px;border:0;border-radius:var(--r-m);background:var(--surface);padding:14px;resize:vertical;line-height:1.7}
 .hint{font-size:13px;color:var(--ink-2)}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;font-size:60px;cursor:pointer}
 @keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(40%);opacity:0}}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);transform:translate(-50%,220px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:30;transition:transform .35s cubic-bezier(.2,1.2,.4,1);white-space:nowrap;pointer-events:none}
 #toast.show{transform:translate(-50%,0)}
-@media (max-height:700px){.turn b{font-size:22px}.acts{min-height:92px}.btn{min-height:50px}.hero{min-height:132px;padding-top:10px}.hero h1{font-size:32px}.hero p{display:none}.screen{gap:10px}
-  .pl .sk{display:none}.face{padding:12px;gap:6px}.face .chip{font-size:11px;padding:3px 8px}.face .rw{font-size:15px}.legend{padding-bottom:10px}.game-main{padding:18px 18px 16px;gap:10px}.duo{transform:scale(.8);transform-origin:top right}}
+@media (max-height:700px){.turn b{font-size:22px}.acts{min-height:92px}.btn{min-height:50px}.hero{min-height:124px;padding-top:10px}.hero h1{font-size:32px}.hero p{display:none}.screen{gap:10px}
+  .pl .sk{display:none}.face{padding:12px;gap:6px}.face .chip{font-size:11px;padding:3px 8px}.face .rw{font-size:15px}.legend{padding-bottom:10px}.duo{transform:scale(.8);transform-origin:top right}
+  .g{padding:11px}.g .art{width:52px;height:52px}.g small{font-size:12.5px}.dice{width:52px;height:52px;padding:9px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -199,40 +245,41 @@ textarea{width:100%;min-height:190px;border:0;border-radius:var(--r-m);backgroun
       <h1>情侣<br>小游戏</h1>
       <p>放下别的事，认真陪对方玩一会儿。</p>
     </div>
-    <div class="game-main">
-      <div class="fanmini" aria-hidden="true"><span style="background:var(--do)"></span><span style="background:var(--say)"></span><span style="background:var(--wow)"></span></div>
-      <h3>心动卡牌</h3>
-      <p>轮流翻牌，做牌上的小事集心。先集满的人，可以向对方许一个愿望。</p>
-      <button class="btn" id="go-setup">开始玩</button>
-      <button class="btn quiet" id="go-resume" hidden>继续上一局</button>
+    <button class="resume" id="go-resume" hidden></button>
+    <div class="games">
+      <button class="g" data-game="cards">
+        <svg class="art" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="13" width="18" height="26" rx="5" transform="rotate(-12 14 26)" style="fill:var(--do)"/><rect x="15" y="9" width="18" height="26" rx="5" style="fill:var(--say)"/><rect x="25" y="13" width="18" height="26" rx="5" transform="rotate(12 34 26)" style="fill:var(--wow)"/></svg>
+        <span><b>心动卡牌</b><small>轮流翻牌，做小事集心。先集满的人许一个愿望。</small></span><svg class="i go" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <button class="g" data-game="tod">
+        <svg class="art" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5a19 19 0 0 0 0 38z" style="fill:var(--rose)"/><path d="M24 5a19 19 0 0 1 0 38z" style="fill:var(--iris)"/><path d="M24 9l4.5 15h-9z" style="fill:var(--surface)"/><circle cx="24" cy="24" r="6" style="fill:var(--surface)"/></svg>
+        <span><b>真心话大冒险</b><small>转盘选人，被选中的人自己挑真心话还是大冒险。</small></span><svg class="i go" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <button class="g" data-game="chess">
+        <svg class="art" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="4" style="fill:var(--do)"/><rect x="18" y="4" width="12" height="12" rx="4" style="fill:var(--say)"/><rect x="32" y="4" width="12" height="12" rx="4" style="fill:var(--wow)"/><rect x="32" y="18" width="12" height="12" rx="4" style="fill:var(--say)"/><rect x="18" y="18" width="12" height="12" rx="4" style="fill:var(--do)"/><rect x="4" y="18" width="12" height="12" rx="4" style="fill:var(--say)"/><rect x="4" y="32" width="12" height="12" rx="4" style="fill:var(--wow)"/><rect x="18" y="32" width="12" height="12" rx="4" style="fill:var(--do)"/><circle cx="38" cy="38" r="6" style="fill:var(--rose)"/></svg>
+        <span><b>双人飞行棋</b><small>掷骰子往前走，停在哪格就做哪格的事，先到终点的人赢。</small></span><svg class="i go" aria-hidden="true"><use href="#i-back"/></svg></button>
     </div>
-    <ul class="soon">
-      <li><b>真心话大冒险</b><em>下一步做</em></li>
-      <li><b>双人飞行棋</b><em>下一步做</em></li>
-    </ul>
     <div class="grow"></div>
     <p class="fine">所有内容只存在这部手机里，不会上传到任何地方。</p>
   </section>
 
   <section class="screen" data-screen="setup" hidden>
-    <div class="bar"><button class="iconbtn" data-go="home" aria-label="返回首页"><svg class="i"><use href="#i-back"/></svg></button><h2>开一局心动卡牌</h2><span class="spacer"></span></div>
+    <div class="bar"><button class="iconbtn" data-go="home" aria-label="返回首页"><svg class="i"><use href="#i-back"/></svg></button><h2 id="setup-title"></h2><span class="spacer"></span></div>
     <div class="field"><span class="lab">你们的昵称</span>
       <div class="names">
         <label class="name"><i style="background:var(--rose)"></i><input id="name-a" maxlength="6" placeholder="桃桃" autocomplete="off" aria-label="第一位的昵称"></label>
         <label class="name"><i style="background:var(--iris)"></i><input id="name-b" maxlength="6" placeholder="阿蓝" autocomplete="off" aria-label="第二位的昵称"></label>
       </div>
     </div>
-    <div class="field"><span class="lab">选一副牌</span><div class="opts" id="decks" role="radiogroup" aria-label="牌组"></div>
-      <button class="btn quiet" id="edit-custom" style="min-height:32px;font-size:14px">编辑专属卡牌</button></div>
-    <div class="field"><span class="lab">集满几颗心算赢</span><div class="seg" id="goals" role="radiogroup" aria-label="目标"></div></div>
+    <div class="field"><span class="lab">选一套内容</span><div class="opts" id="decks" role="radiogroup" aria-label="内容"></div>
+      <div class="links"><button class="btn quiet" id="edit-custom">编辑专属内容</button><button class="btn quiet" id="open-import">导入题库</button></div></div>
+    <div class="field" id="goal-field"><span class="lab">集满几颗心算赢</span><div class="seg" id="goals" role="radiogroup" aria-label="目标"></div></div>
     <div class="grow"></div>
     <button class="btn" id="start">开始</button>
   </section>
 
-  <section class="screen" data-screen="game" hidden>
-    <div class="bar"><button class="iconbtn" data-go="home" aria-label="回首页，进度会保存"><svg class="i"><use href="#i-back"/></svg></button><h2 id="deck-name"></h2><button class="iconbtn" id="open-rules" aria-label="怎么玩"><svg class="i"><use href="#i-q"/></svg></button></div>
+  <section class="screen" data-screen="play" hidden>
+    <div class="bar"><button class="iconbtn" data-go="home" aria-label="回首页，进度会保存"><svg class="i"><use href="#i-back"/></svg></button><h2 id="play-title"></h2><button class="iconbtn" id="open-rules" aria-label="怎么玩"><svg class="i"><use href="#i-q"/></svg></button></div>
     <div class="score" id="score"></div>
-    <div class="turn"><span class="eyebrow" id="turn-eyebrow">轮到</span><b id="turn-name"></b></div>
+    <div class="turn"><span class="eyebrow" id="turn-eyebrow"></span><b id="turn-name"></b></div>
     <div class="stage grow" id="stage"></div>
     <div class="acts" id="acts"></div>
   </section>
@@ -248,23 +295,28 @@ textarea{width:100%;min-height:190px;border:0;border-radius:var(--r-m);backgroun
 </main>
 
 <div class="veil" id="rules" hidden><div class="sheet" role="dialog" aria-labelledby="rules-h">
-  <h3 id="rules-h">怎么玩</h3>
-  <ol class="steps">
-    <li><div>轮到谁，谁从三张盖着的牌里<b>翻一张</b>。牌背的颜色告诉你是哪一类：
-      <div class="chips"><span class="chip t-d"><svg class="i"><use href="#i-d"/></svg>行动</span><span class="chip t-s"><svg class="i"><use href="#i-s"/></svg>真心话</span><span class="chip t-w"><svg class="i"><use href="#i-w"/></svg>惊喜</span></div></div></li>
-    <li><div>照牌上写的做。做完得<b>一颗心</b>；写着“两人一起”的，两个人各得一颗。</div></li>
-    <li><div>不想做可以<b>跳过</b>，每人每局三次，跳过不得心。先集满心的人赢，可以向对方<b>许一个愿望</b>。</div></li>
-  </ol>
+  <h3 id="rules-h">怎么玩</h3><ol class="steps" id="rules-steps"></ol>
   <button class="btn" data-close>知道了</button>
 </div></div>
 
 <div class="veil" id="custom" hidden><div class="sheet" role="dialog" aria-labelledby="custom-h">
-  <h3 id="custom-h">我们的专属卡牌</h3>
-  <p class="hint">一行就是一张牌，写你们自己才懂的小事。写上 {ta} 的地方，会自动换成对方的昵称。至少写 6 行才能选这副牌。</p>
-  <textarea id="custom-text" placeholder="带{ta}去吃第一次约会的那家店&#10;给{ta}讲一个睡前故事" aria-label="专属卡牌内容"></textarea>
+  <h3 id="custom-h">我们的专属内容</h3>
+  <p class="hint">一行一条，三个游戏都能用。以问号结尾的算“真心话”，其它算“行动”。写上 {ta} 的地方会自动换成对方的昵称。至少写 6 行才能选。</p>
+  <textarea id="custom-text" placeholder="带{ta}去吃第一次约会的那家店&#10;你最想和{ta}一起过的节日是哪个？" aria-label="专属内容"></textarea>
   <button class="btn" id="save-custom">保存</button>
   <button class="btn quiet" data-close>取消</button>
 </div></div>
+
+<div class="veil" id="import" hidden><div class="sheet" role="dialog" aria-labelledby="import-h">
+  <h3 id="import-h">导入题库</h3>
+  <p class="hint">选择题库文件（.json），里面的每一套内容都会出现在对应游戏的“选一套内容”里。内容只保存在这部手机上。</p>
+  <p class="hint" id="import-state"></p>
+  <label class="btn filebtn">选择题库文件<input type="file" id="import-file" accept=".json,.txt,application/json,text/plain"></label>
+  <button class="btn soft" id="import-clear" hidden>删除已导入的题库</button>
+  <button class="btn quiet" data-close>关闭</button>
+</div></div>
+
+<div class="veil mid" id="cardveil" data-lock hidden><div class="cardbox"><div class="slot" id="cv-card"></div><div class="acts" id="cv-acts"></div></div></div>
 <div id="toast" role="status"></div>
 
 <script>
@@ -274,8 +326,11 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const icon = (id, cls = 'i') => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', cls); const u = document.createElementNS('http://www.w3.org/2000/svg', 'use'); u.setAttribute('href', '#' + id); s.append(u); return s; };
+const btn = (label, cls, fn, ic) => { const b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); if (ic) b.append(icon(ic)); b.onclick = fn; return b; };
+const rnd = n => Math.floor(Math.random() * n);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-/* ---------- 题库：想改内容，改这里就行。d=行动 s=真心话 b=两人一起 ---------- */
+/* ---------- 自带题库：想改内容，改这里就行。d=行动 s=真心话 b=两人一起 ---------- */
 const d = t => ({ t: 'd', who: 'me', text: t }), s = t => ({ t: 's', who: 'me', text: t }), b = t => ({ t: 'd', who: 'both', text: t });
 const DECKS = {
   first: { name: '初见', sub: '轻松聊聊天，适合热身', heat: 1, cards: [
@@ -306,7 +361,6 @@ const DECKS = {
     s('{ta}的哪个眼神最让你招架不住？'), s('说一句你一直想对{ta}说、但有点不好意思的话。'), s('如果今晚的时间可以停住，你想停在哪一刻？'),
     s('你最喜欢{ta}怎么叫你？'), s('说说你理想中和{ta}一起度过的一个夜晚。'),
     b('对视 30 秒，谁先笑，谁亲对方一下。'), b('关掉一盏灯，抱在一起安静 30 秒。'), b('十指相扣，轮流说一句“我喜欢你，因为……”。'), b('一起许一个只属于你们两个人的约定。') ] },
-  custom: { name: '专属', sub: '你们自己写的牌', heat: 0, cards: [] },
 };
 const WOW = [
   { t: 'w', who: 'me', title: '双倍心动', hearts: 2, text: '给{ta}一个大大的拥抱，再说一句“遇见你真好”。' },
@@ -314,49 +368,77 @@ const WOW = [
   { t: 'w', who: 'me', title: '偷心', fx: 'steal', text: '从{ta}那里拿走一颗心。TA 还没有心的话，你直接得一颗。' },
   { t: 'w', who: 'both', title: '小小心愿', text: '向{ta}提一个 1 分钟内能做到的小要求。TA 做到了，你们各得一颗心。' },
 ];
+const FX = {
+  '+2': { title: '顺风', text: '再往前走 2 格。', label: '+2' }, '-2': { title: '绕路', text: '往回退 2 格。', label: '−2' },
+  again: { title: '再来一次', text: '这一格什么都不用做，再掷一次骰子。', label: '再掷' }, swap: { title: '换位', text: '和{ta}交换位置。', label: '换位' },
+};
 const TYPE = { d: { name: '行动', done: '做完了' }, s: { name: '真心话', done: '说完了' }, w: { name: '惊喜', done: '完成了' } };
+const GAMES = { cards: '心动卡牌', tod: '真心话大冒险', chess: '双人飞行棋' };
 const GOALS = [[5, '约 10 分钟'], [7, '约 20 分钟'], [10, '约 30 分钟']];
-const SKIPS = 3, MIN_CUSTOM = 6;
+const SKIPS = 3, MIN_CUSTOM = 6, N = 30, LAST = N - 1, IMPORT_FORMAT = 'couple-games-import-v1';
+const CHIPS = '<div class="chips">' + ['d', 's', 'w'].map(t => `<span class="chip t-${t}"><svg class="i"><use href="#i-${t}"/></svg>${TYPE[t].name}</span>`).join('') + '</div>';
+const RULES = {
+  cards: ['轮到谁，谁从三张盖着的牌里<b>翻一张</b>。牌背的颜色告诉你是哪一类：' + CHIPS, '照牌上写的做。做完得<b>一颗心</b>；写着“两人一起”的，两个人各得一颗。', '不想做可以<b>跳过</b>，每人每局三次，跳过不得心。先集满心的人赢，可以向对方<b>许一个愿望</b>。'],
+  tod: ['点<b>转一转</b>，指针停在谁那边，就轮到谁。同一个人最多连着被选中两次。', '被选中的人自己挑：<b>真心话</b>是回答一个问题，<b>大冒险</b>是做一件小事。', '题目不合适可以<b>换一题</b>，每轮一次。连选两次真心话之后，下一次只能选大冒险。'],
+  chess: ['轮流<b>掷骰子</b>，按点数往前走。先走到终点的人赢，可以向对方<b>许一个愿望</b>。', '停在哪种颜色的格子，就做哪一类的事：' + CHIPS + '惊喜格会让你前进、后退、再掷一次，或者和对方换位置。', '不想做也可以，但要<b>后退 2 格</b>。'],
+};
 
 /* ---------- 存档（只在本机） ---------- */
 const KEY = 'couple-games-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ P, G })); } catch (e) {} };
-let P = { names: ['', ''], deckId: 'sweet', goal: 7, custom: '', seenRules: false };   // 设置
-let G = null;                                                                        // 当前这一局
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ P, G })); return true; } catch (e) { return false; } };
+let P = { names: ['', ''], deckId: 'sweet', goal: 7, custom: '', seenRules: {}, imported: [] };   // 设置
+let G = null;                                                                                    // 当前这一局
+let screen = 'home', setupGame = 'cards', busy = false, epoch = 0, needleAng = 0, toastT;
+const later = (ms, fn) => { const e = epoch; setTimeout(() => { if (e === epoch) fn(); }, ms); };
 
-const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const customLines = () => P.custom.split('\n').map(x => x.trim()).filter(Boolean);
-const deckCards = id => (id === 'custom' ? customLines().map(d) : DECKS[id].cards).concat(WOW);
+const parseCustom = () => customLines().map(x => /[?？]$/.test(x) ? s(x) : d(x));
 const names = () => [P.names[0].trim() || '桃桃', P.names[1].trim() || '阿蓝'];
-
-/* ---------- 切换页面 ---------- */
-function go(name) {
-  $$('.screen').forEach(x => x.hidden = x.dataset.screen !== name);
-  if (name === 'game' || name === 'win') document.body.dataset.turn = name === 'win' ? G.winner : G.turn; else delete document.body.dataset.turn;
-  if (name === 'home') $('#go-resume').hidden = !(G && G.winner == null);
-  if (name === 'setup') renderSetup();
-  if (name === 'game') renderGame(true);
-  if (name === 'win') renderWin();
-  screen = name;
+function deckList(game) {                                 // 这个游戏能选的全部内容
+  const list = Object.entries(DECKS).map(([id, dk]) => ({ id, ...dk }));
+  const n = customLines().length;
+  list.push({ id: 'custom', name: '专属', sub: n >= MIN_CUSTOM ? `你们自己写的 · ${n} 条` : '还没写够，点这里写', heat: 0, cards: parseCustom(), locked: n < MIN_CUSTOM });
+  P.imported.forEach((dk, i) => { if (dk.game === game) list.push({ id: 'imp' + i, name: dk.name, sub: `导入的 · ${dk.d.length + dk.s.length} 条`, heat: 0, cards: dk.d.map(d).concat(dk.s.map(s)) }); });
+  return list;
 }
-let screen = 'home', toastT;
+const getDeck = (game, id) => { const l = deckList(game); return l.find(x => x.id === id && !x.locked) || l.find(x => x.id === 'sweet'); };
+function queues(cards) {                                  // 真心话大冒险、飞行棋用：两类各一摞，抽完再洗
+  const pick = t => { const a = cards.filter(c => c.t === t); return shuffle(a.length ? a : DECKS.sweet.cards.filter(c => c.t === t)); };
+  return { d: pick('d'), s: pick('s'), ud: [], us: [] };
+}
+function draw(t) { const q = G.q; if (!q[t].length) { q[t] = shuffle(q['u' + t]); q['u' + t] = []; } const c = q[t].shift(); q['u' + t].push(c); return c; }
+
+/* ---------- 页面切换 ---------- */
+function wash() { const t = G && (screen === 'play' || screen === 'win') ? (G.winner != null ? G.winner : G.turn) : null; if (t == null) delete document.body.dataset.turn; else document.body.dataset.turn = t; }
+function go(name) {
+  screen = name; busy = false; epoch++;
+  $$('.screen').forEach(x => x.hidden = x.dataset.screen !== name);
+  $('#cardveil').hidden = true; wash();
+  if (name === 'home') { const r = $('#go-resume'); r.hidden = !(G && G.winner == null); if (!r.hidden) r.textContent = '继续上一局 · ' + GAMES[G.game]; }
+  if (name === 'setup') renderSetup();
+  if (name === 'play') render();
+  if (name === 'win') renderWin();
+}
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
 const openSheet = id => { $(id).hidden = false; };
-$$('.veil').forEach(v => v.addEventListener('click', e => { if (e.target === v || e.target.closest('[data-close]')) v.hidden = true; }));
-document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
+$$('.veil').forEach(v => v.addEventListener('click', e => { if (v.dataset.lock != null) return; if (e.target === v || e.target.closest('[data-close]')) v.hidden = true; }));
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) return go(g.dataset.go); const gm = e.target.closest('[data-game]'); if (gm) { setupGame = gm.dataset.game; go('setup'); } });
+function openRules(game) { $('#rules-steps').innerHTML = RULES[game].map(x => `<li><div>${x}</div></li>`).join(''); openSheet('#rules'); }
 
 /* ---------- 开局设置 ---------- */
 function renderSetup() {
+  $('#setup-title').textContent = '开一局' + GAMES[setupGame];
   $('#name-a').value = P.names[0]; $('#name-b').value = P.names[1];
-  const n = customLines().length, box = $('#decks'); box.replaceChildren();
-  if (P.deckId === 'custom' && n < MIN_CUSTOM) P.deckId = 'sweet';
-  for (const [id, dk] of Object.entries(DECKS)) {
-    const o = el('button', 'opt'); o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', P.deckId === id);
-    const sub = el('small', '', id !== 'custom' ? dk.sub : n >= MIN_CUSTOM ? `${dk.sub} · ${n} 张` : '还没写够，点这里写');
-    const heat = el('span', 'heat'); heat.setAttribute('aria-label', dk.heat ? `亲密程度 ${dk.heat} / 3` : '');
-    for (let i = 1; i <= 3 && dk.heat; i++) heat.append(icon('i-heart', 'i' + (i <= dk.heat ? ' on' : '')));
-    o.append(el('b', '', dk.name), heat, sub); o.onclick = () => { if (id === 'custom' && n < MIN_CUSTOM) return editCustom(); P.deckId = id; save(); renderSetup(); }; box.append(o);
+  $('#goal-field').hidden = setupGame !== 'cards';
+  const list = deckList(setupGame), box = $('#decks'); box.replaceChildren();
+  const cur = getDeck(setupGame, P.deckId).id;
+  for (const dk of list) {
+    const o = el('button', 'opt'); o.setAttribute('role', 'radio'); o.setAttribute('aria-checked', cur === dk.id);
+    const heat = el('span', 'heat'); for (let i = 1; i <= 3 && dk.heat; i++) heat.append(icon('i-heart', 'i' + (i <= dk.heat ? ' on' : '')));
+    if (dk.heat) heat.setAttribute('aria-label', `亲密程度 ${dk.heat} / 3`);
+    o.append(el('b', '', dk.name), heat, el('small', '', dk.sub));
+    o.onclick = () => { if (dk.locked) return editCustom(); P.deckId = dk.id; save(); renderSetup(); }; box.append(o);
   }
   const gs = $('#goals'); gs.replaceChildren();
   for (const [g, time] of GOALS) {
@@ -369,26 +451,75 @@ const editCustom = () => { $('#custom-text').value = P.custom; openSheet('#custo
 $('#edit-custom').onclick = editCustom;
 $('#save-custom').onclick = () => {
   P.custom = $('#custom-text').value; const n = customLines().length; save(); $('#custom').hidden = true; renderSetup();
-  toast(n >= MIN_CUSTOM ? `已保存 ${n} 张专属卡牌` : `已保存。再写 ${MIN_CUSTOM - n} 行就能选这副牌`);
+  toast(n >= MIN_CUSTOM ? `已保存 ${n} 条专属内容` : `已保存。再写 ${MIN_CUSTOM - n} 行就能选`);
 };
 
-/* ---------- 一局游戏 ---------- */
-function newGame() {
-  G = { names: names(), deckId: P.deckId, deckName: DECKS[P.deckId].name, goal: P.goal, hearts: [0, 0], skips: [SKIPS, SKIPS],
-        turn: Math.random() < .5 ? 0 : 1, deck: shuffle(deckCards(P.deckId)), pile: [], hand: [], card: null, drawn: 0, winner: null };
-  deal(); save(); go('game');
-  if (!P.seenRules) { P.seenRules = true; save(); openSheet('#rules'); } else toast(`${G.names[G.turn]} 先翻牌`);
+/* ---------- 导入题库 ---------- */
+function importState() {
+  const n = P.imported.length, total = P.imported.reduce((a, x) => a + x.d.length + x.s.length, 0);
+  $('#import-state').textContent = n ? `现在已导入 ${n} 套，共 ${total} 条。再导入会替换掉它们。` : '现在还没有导入过。';
+  $('#import-clear').hidden = !n;
 }
+$('#open-import').onclick = () => { importState(); openSheet('#import'); };
+$('#import-clear').onclick = () => { P.imported = []; save(); importState(); renderSetup(); toast('已删除导入的题库'); };
+$('#import-file').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  const rd = new FileReader();
+  rd.onerror = () => toast('文件读不出来，再试一次');
+  rd.onload = () => {
+    let data; try { data = JSON.parse(rd.result); } catch (err) { return toast('这不是题库文件'); }
+    if (!data || data.format !== IMPORT_FORMAT || !Array.isArray(data.decks)) return toast('这不是题库文件');
+    const clean = a => Array.isArray(a) ? [...new Set(a.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean))] : [];
+    const decks = data.decks.filter(x => x && GAMES[x.game] && typeof x.name === 'string').map(x => ({ name: x.name.slice(0, 12), game: x.game, d: clean(x.d), s: clean(x.s) })).filter(x => x.d.length + x.s.length >= 3);
+    if (!decks.length) return toast('文件里没有可用的内容');
+    const before = P.imported; P.imported = decks;
+    if (!save()) { P.imported = before; return toast('手机存储空间不够，没有导入'); }
+    importState(); renderSetup(); toast(`已导入 ${decks.length} 套内容`);
+  };
+  rd.readAsText(f);
+});
+
+/* ---------- 三个游戏共用的界面零件 ---------- */
+function fill(node, text, ta) { text.split('{ta}').forEach((part, i) => { if (i) node.append(el('b', '', ta)); node.append(part); }); }
+function scoreboard(active, info) {
+  const sc = $('#score'); sc.replaceChildren(); sc.classList.toggle('idle', active == null);
+  G.names.forEach((n, p) => {
+    const box = el('div', 'pl' + (p === active ? ' on' : '')); box.dataset.p = p; const i = info(p);
+    const nm = el('div', 'n'); nm.append(el('i'), n, el('span', '', i.badge)); box.append(nm, i.body); if (i.foot) box.append(el('div', 'sk', i.foot)); sc.append(box);
+  });
+}
+function banner(eyebrow, name) { $('#turn-eyebrow').textContent = eyebrow; $('#turn-name').textContent = name; }
+function cardEl(c, me, reward, label) {
+  const flip = el('div', 'flip t-' + c.t), face = el('div', 'face');
+  const chips = el('div', 'chips'), tch = el('span', 'chip'); tch.append(icon('i-' + c.t), label || TYPE[c.t].name); chips.append(tch);
+  if (!c.fx || c.fx === 'steal') chips.append(el('span', 'chip who', c.who === 'both' ? '两人一起' : G.names[me] + ' 来'));
+  const txt = el('div', 'txt' + (c.text.length > 34 ? ' long' : '')); if (c.title) txt.append(el('strong', '', c.title));
+  const pp = el('span'); fill(pp, c.text, G.names[1 - me]); txt.append(pp); face.append(chips, txt);
+  if (reward) { const rw = el('div', 'rw'); rw.append(reward, icon('i-heart')); face.append(rw); }
+  flip.append(el('div', 'rear'), face);
+  requestAnimationFrame(() => requestAnimationFrame(() => flip.classList.add('open')));
+  return flip;
+}
+const R = {}, INIT = {};
+function render() { $('#stage').className = 'stage grow'; $('#stage').replaceChildren(); $('#acts').replaceChildren(); R[G.game](); }
+function newGame(game) {
+  const dk = getDeck(game, P.deckId);
+  G = { game, names: names(), deckName: dk.name, turn: rnd(2), winner: null, card: null };
+  Object.assign(G, INIT[game](dk)); save(); go('play');
+  if (!P.seenRules[game]) { P.seenRules[game] = true; save(); openRules(game); } else if (game !== 'tod') toast(`${G.names[G.turn]} 先来`);
+}
+
+/* ---------- 心动卡牌 ---------- */
+INIT.cards = dk => { const g = { goal: P.goal, hearts: [0, 0], skips: [SKIPS, SKIPS], deck: shuffle(dk.cards.concat(WOW)), pile: [], drawn: 0 }; g.hand = g.deck.splice(0, 3); return g; };
 function deal() {
   if (G.deck.length < 3) { G.deck = G.deck.concat(shuffle(G.pile)); G.pile = []; toast('牌翻完一轮了，已重新洗牌'); }
   G.hand = G.deck.splice(0, 3); G.card = null;
 }
 function pick(i) {
   if (G.card) return;                                   // 防止连点
-  G.card = G.hand[i]; G.deck.push(...G.hand.filter((_, k) => k !== i)); G.hand = []; G.drawn++;
-  save(); renderGame();
+  G.card = G.hand[i]; G.deck.push(...G.hand.filter((_, k) => k !== i)); G.hand = []; G.drawn++; save(); render();
 }
-function finish(done) {
+function cardsDone(done) {
   const c = G.card; if (!c) return;
   const me = G.turn, ta = 1 - me, gained = [];
   if (done) {
@@ -399,64 +530,154 @@ function finish(done) {
   G.pile.push(c); G.card = null;
   const won = G.hearts[me] >= G.goal ? me : G.hearts[ta] >= G.goal ? ta : null;
   if (won != null) { G.winner = won; save(); return go('win'); }
-  G.turn = ta; deal(); save(); document.body.dataset.turn = G.turn; renderGame(true, gained);
+  G.turn = ta; deal(); save(); wash(); render(); popHearts(gained);
 }
-
-function fill(node, text, ta) {                          // 把 {ta} 换成对方昵称并加粗
-  text.split('{ta}').forEach((part, i) => { if (i) node.append(el('b', '', ta)); node.append(part); });
-}
-function renderGame(fresh, gained = []) {
-  const me = G.turn, ta = 1 - me;
-  $('#deck-name').textContent = G.deckName + ' · 集满 ' + G.goal + ' 颗心';
-  const sc = $('#score'); sc.replaceChildren();
-  G.names.forEach((n, p) => {
-    const box = el('div', 'pl' + (p === me ? ' on' : '')); box.dataset.p = p;
-    const nm = el('div', 'n'); nm.append(el('i'), n, el('span', '', G.hearts[p] + '/' + G.goal));
-    const hs = el('div', 'hearts'); hs.style.setProperty('--cols', G.goal === 10 ? 10 : G.goal);
-    for (let i = 0; i < G.goal; i++) hs.append(icon('i-heart', (i < G.hearts[p] ? 'on' : '') + (gained.includes(p) && i === G.hearts[p] - 1 ? ' pop' : '')));
-    box.append(nm, hs, el('div', 'sk', `还能跳过 ${G.skips[p]} 次`)); sc.append(box);
-  });
-  $('#turn-name').textContent = G.names[me];
-  const stage = $('#stage'), acts = $('#acts'); stage.replaceChildren(); acts.replaceChildren();
+function popHearts(ps) { ps.forEach(p => { const h = $$(`.pl[data-p="${p}"] .hearts svg.on`).pop(); if (h) h.classList.add('pop'); }); }
+R.cards = () => {
+  const me = G.turn, stage = $('#stage'), acts = $('#acts');
+  $('#play-title').textContent = `${G.deckName} · 集满 ${G.goal} 颗心`;
+  scoreboard(me, p => { const hs = el('div', 'hearts'); hs.style.setProperty('--cols', G.goal); for (let i = 0; i < G.goal; i++) hs.append(icon('i-heart', i < G.hearts[p] ? 'on' : '')); return { badge: G.hearts[p] + '/' + G.goal, body: hs, foot: `还能跳过 ${G.skips[p]} 次` }; });
   if (!G.card) {
-    $('#turn-eyebrow').textContent = '轮到 · 选一张牌翻开';
+    banner('轮到 · 选一张牌翻开', G.names[me]);
     const hand = el('div', 'hand');
     G.hand.forEach((c, i) => { const bk = el('button', 'back t-' + c.t); bk.append(icon('i-' + c.t), el('span', '', TYPE[c.t].name)); bk.setAttribute('aria-label', '翻开这张' + TYPE[c.t].name + '牌'); bk.onclick = () => pick(i); hand.append(bk); });
     stage.append(hand);
     const lg = el('div', 'legend'); for (const t of ['d', 's', 'w']) { const ch = el('span', 'chip t-' + t); ch.append(icon('i-' + t), TYPE[t].name); lg.append(ch); } acts.append(lg);
     return;
   }
-  const c = G.card, both = c.who === 'both', steal = c.fx === 'steal';
-  $('#turn-eyebrow').textContent = '轮到';
-  const flip = el('div', 'flip t-' + c.t), face = el('div', 'face');
-  const chips = el('div', 'chips'), tch = el('span', 'chip'); tch.append(icon('i-' + c.t), TYPE[c.t].name);
-  chips.append(tch, el('span', 'chip who', both ? '两人一起' : G.names[me] + ' 来'));
-  const txt = el('div', 'txt'); if (c.title) txt.append(el('strong', '', c.title)); const pp = el('span'); fill(pp, c.text, G.names[ta]); txt.append(pp);
-  const rw = el('div', 'rw'); rw.append(both ? '各 +1' : '+' + (c.hearts || 1), icon('i-heart'));
-  face.append(chips, txt, rw); flip.append(el('div', 'rear'), face); stage.append(flip);
-  requestAnimationFrame(() => requestAnimationFrame(() => flip.classList.add('open')));
-  const ok = el('button', 'btn'); ok.append(steal ? '收下这颗心' : TYPE[c.t].done, icon('i-heart')); ok.onclick = () => finish(true);
-  acts.append(ok);
-  if (!steal) { const sk = el('button', 'btn quiet', G.skips[me] > 0 ? `跳过这张（还剩 ${G.skips[me]} 次）` : '跳过次数用完了'); sk.disabled = G.skips[me] <= 0; sk.onclick = () => finish(false); acts.append(sk); }
+  const c = G.card, steal = c.fx === 'steal';
+  banner('轮到', G.names[me]);
+  stage.append(cardEl(c, me, c.who === 'both' ? '各 +1' : '+' + (c.hearts || 1)));
+  acts.append(btn(steal ? '收下这颗心' : TYPE[c.t].done, '', () => cardsDone(true), 'i-heart'));
+  if (!steal) { const sk = btn(G.skips[me] > 0 ? `跳过这张（还剩 ${G.skips[me]} 次）` : '跳过次数用完了', 'quiet', () => cardsDone(false)); sk.disabled = G.skips[me] <= 0; acts.append(sk); }
+};
+
+/* ---------- 真心话大冒险 ---------- */
+INIT.tod = dk => ({ turn: null, q: queues(dk.cards), phase: 'spin', round: 1, cnt: [{ s: 0, d: 0 }, { s: 0, d: 0 }], run: [0, 0], streak: { p: null, n: 0 }, swapLeft: 1 });
+function spin() {
+  if (busy || G.phase !== 'spin') return; busy = true;
+  const p = G.streak.n >= 2 ? 1 - G.streak.p : rnd(2);     // 同一个人最多连着两次
+  G.streak = { p, n: G.streak.p === p ? G.streak.n + 1 : 1 }; G.turn = p; G.phase = 'choose'; G.swapLeft = 1; save();
+  const target = (p === 1 ? 25 : 205) + rnd(131), nd = $('.needle');
+  const to = Math.ceil(needleAng / 360) * 360 + 360 * 4 + target; needleAng = to;
+  $$('#acts .btn').forEach(x => x.disabled = true);
+  if (nd) nd.style.transform = `rotate(${to}deg)`;
+  later(matchMedia('(prefers-reduced-motion:reduce)').matches ? 400 : 2550, () => { busy = false; wash(); render(); });
 }
+function todChoose(t) { if (G.phase !== 'choose') return; G.card = draw(t); G.phase = 'card'; save(); render(); }
+function todSwap() { if (G.phase !== 'card' || G.swapLeft < 1) return; G.swapLeft--; G.card = draw(G.card.t); save(); render(); }
+function todDone() {
+  if (G.phase !== 'card') return; const p = G.turn, t = G.card.t;
+  G.cnt[p][t]++; G.run[p] = t === 's' ? G.run[p] + 1 : 0; G.card = null; G.phase = 'spin'; G.round++; G.turn = null; save(); wash(); render();
+}
+R.tod = () => {
+  const p = G.turn, stage = $('#stage'), acts = $('#acts');
+  $('#play-title').textContent = `真心话大冒险 · ${G.deckName}`;
+  scoreboard(G.phase === 'spin' ? null : p, q => ({ badge: G.cnt[q].s + G.cnt[q].d, body: el('div', 'meta', `真心话 ${G.cnt[q].s} · 大冒险 ${G.cnt[q].d}`) }));
+  if (G.phase === 'card') {
+    const c = G.card; banner('轮到', G.names[p]);
+    stage.append(cardEl(c, p, null, c.t === 's' ? '真心话' : '大冒险'));
+    const sw = btn(G.swapLeft > 0 ? '换一题（这轮还能换 1 次）' : '这轮已经换过了', 'quiet', todSwap); sw.disabled = G.swapLeft < 1;
+    acts.append(btn(c.t === 's' ? '说完了' : '做完了', '', todDone, 'i-heart'), sw); return;
+  }
+  const spinning = G.phase === 'spin';
+  banner(spinning ? `第 ${G.round} 轮` : '指针选中了', spinning ? '这次轮到谁？' : G.names[p]);
+  if (!spinning && needleAng % 360 === 0) needleAng = p === 1 ? 90 : 270;
+  const w = el('div', 'wheel'), nd = el('div', 'needle'); nd.style.transform = `rotate(${needleAng}deg)`;
+  w.append(el('span', 'nm l', G.names[0]), el('span', 'nm r', G.names[1]), nd, el('div', 'hub', spinning ? '?' : G.names[p].slice(0, 2)));
+  stage.append(w);
+  if (spinning) { w.onclick = spin; acts.append(btn('转一转', '', spin)); return; }
+  const forced = G.run[p] >= 2, pair = el('div', 'pair');
+  const bs = btn('真心话', 'kind t-s', () => todChoose('s')), bd = btn('大冒险', 'kind t-d', () => todChoose('d')); bs.disabled = forced; pair.append(bs, bd);
+  acts.append(pair, el('div', 'note', forced ? '已经连选两次真心话，这次选大冒险吧' : `${G.names[p]}，自己挑一个`));
+};
+
+/* ---------- 双人飞行棋 ---------- */
+function makeBoard(cards) {                              // 这套内容里没有的类型，棋盘上就不出现
+  const has = t => cards.some(c => c.t === t), only = has('d') && has('s') ? null : has('s') ? 's' : 'd';
+  const fx = { 4: '+2', 9: 'again', 13: '-2', 18: '+2', 22: 'swap', 26: '-2' }, kinds = shuffle(Array.from({ length: N - 2 - 6 }, (_, i) => only || (i % 2 ? 'd' : 's'))); let k = 0;
+  return Array.from({ length: N }, (_, i) => i === 0 ? { t: 'a' } : i === LAST ? { t: 'z' } : fx[i] ? { t: 'w', fx: fx[i] } : { t: kinds[k++] });
+}
+INIT.chess = dk => ({ q: queues(dk.cards), phase: 'roll', pos: [0, 0], board: makeBoard(dk.cards), dice: 1, rolls: 0 });
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const setDice = (de, n) => $$('i', de).forEach((x, i) => x.classList.toggle('on', PIPS[n].includes(i)));
+function place(p, idx, hop) { const pc = $(`.piece[data-p="${p}"]`), cell = $('.board').children[idx]; if (!pc || !cell) return; cell.append(pc); if (hop) { pc.classList.remove('hop'); void pc.offsetWidth; pc.classList.add('hop'); } }
+function animate(from, to, jump, cb) {                    // 棋子一格一格走；状态早就存好了，这里只是演出
+  const jobs = [0, 1].filter(p => from[p] !== to[p]);
+  const next = () => { const p = jobs.shift(); if (p == null) return cb(); let at = from[p];
+    if (jump) { place(p, to[p], true); return later(260, next); }
+    const step = () => { if (at === to[p]) return later(120, next); at += to[p] > at ? 1 : -1; place(p, at, true); later(190, step); }; step(); };
+  next();
+}
+function afterMove(msg) { busy = false; if (G.winner != null) return go('win'); wash(); render(); if (msg) toast(msg); }
+function roll() {
+  if (busy || G.phase !== 'roll') return; busy = true;
+  const me = G.turn, n = 1 + rnd(6), from = G.pos.slice();
+  G.dice = n; G.rolls++; G.pos[me] = Math.min(LAST, from[me] + n);
+  if (G.pos[me] >= LAST) G.winner = me;
+  else { const cell = G.board[G.pos[me]]; G.card = cell.t === 'w' ? { t: 'w', who: 'me', fx: cell.fx, title: FX[cell.fx].title, text: FX[cell.fx].text } : draw(cell.t); G.phase = 'card'; }
+  save();
+  const de = $('.dice'), bt = $('#acts .btn'); if (bt) bt.disabled = true; de.classList.add('rolling'); let k = 0;
+  const tick = () => { if (k++ < 7) { setDice(de, 1 + rnd(6)); return later(70, tick); } de.classList.remove('rolling'); setDice(de, n); later(280, () => animate(from, G.pos.slice(), false, () => later(200, afterMove))); };
+  tick();
+}
+function chessDone(done) {
+  const c = G.card; if (!c || busy || G.phase !== 'card') return; busy = true;
+  const me = G.turn, from = G.pos.slice();
+  if (c.fx === '+2') G.pos[me] = Math.min(LAST, G.pos[me] + 2);
+  else if (c.fx === '-2' || (!c.fx && !done)) G.pos[me] = Math.max(0, G.pos[me] - 2);
+  else if (c.fx === 'swap') G.pos = [G.pos[1], G.pos[0]];
+  G.card = null; G.phase = 'roll';
+  if (G.pos[me] >= LAST) G.winner = me; else if (c.fx !== 'again') G.turn = 1 - me;
+  save(); $('#cardveil').hidden = true;
+  animate(from, G.pos.slice(), c.fx === 'swap', () => afterMove(c.fx === 'again' ? '再掷一次' : ''));
+}
+function showCardVeil() {
+  const c = G.card, me = G.turn, acts = $('#cv-acts'); if (!c) return;
+  $('#cv-card').replaceChildren(cardEl(c, me)); acts.replaceChildren();
+  if (c.fx) acts.append(btn('好的', '', () => chessDone(true)));
+  else acts.append(btn(TYPE[c.t].done, '', () => chessDone(true), 'i-heart'), btn('不做，后退 2 格', 'soft', () => chessDone(false)));
+  $('#cardveil').hidden = false;
+}
+R.chess = () => {
+  const me = G.turn, stage = $('#stage'), acts = $('#acts');
+  $('#play-title').textContent = `飞行棋 · ${G.deckName}`;
+  scoreboard(me, p => { const bar = el('div', 'prog'), f = el('i'); f.style.width = (G.pos[p] / LAST * 100) + '%'; bar.append(f); return { badge: `${G.pos[p] + 1}/${N}`, body: bar }; });
+  banner(G.phase === 'card' ? '轮到' : '轮到 · 掷骰子', G.names[me]);
+  stage.classList.add('cq'); const bd = el('div', 'board');
+  G.board.forEach((c, i) => {
+    const row = Math.floor(i / 6), col = row % 2 ? 5 - i % 6 : i % 6, cell = el('div', 'cell t-' + c.t);
+    cell.style.gridRow = row + 1; cell.style.gridColumn = col + 1;
+    if (c.t === 'a') cell.append('起'); else if (c.t === 'z') cell.append('终'); else { cell.append(el('u', '', i + 1)); if (c.t === 'w') cell.append(FX[c.fx].label); else cell.append(icon('i-' + c.t)); }
+    bd.append(cell);
+  });
+  stage.append(bd);
+  [0, 1].forEach(p => { const pc = el('div', 'piece' + (p === me ? ' me' : ''), G.names[p].slice(0, 1)); pc.dataset.p = p; bd.children[G.pos[p]].append(pc); });
+  const de = el('div', 'dice'); for (let i = 0; i < 9; i++) de.append(el('i')); setDice(de, G.dice);
+  const row = el('div', 'rowx'), rb = btn('掷骰子', '', roll); rb.disabled = G.phase !== 'roll'; row.append(de, rb); acts.append(row);
+  if (G.phase === 'card') showCardVeil();
+};
+
+/* ---------- 结束 ---------- */
 function renderWin() {
   const w = G.winner, l = 1 - w;
   $('#win-name').textContent = G.names[w] + ' 赢了';
   const p = $('#win-wish'); p.replaceChildren(); p.append(el('b', '', G.names[w]), ' 可以向 ', el('b', '', G.names[l]), ' 许一个愿望。说出来吧，TA 要认真完成。');
-  $('#win-stat').textContent = `这一局一共翻了 ${G.drawn} 张牌 · ${G.names[0]} ${G.hearts[0]} 颗心，${G.names[1]} ${G.hearts[1]} 颗心`;
+  $('#win-stat').textContent = G.game === 'chess' ? `这一局一共掷了 ${G.rolls} 次骰子` : `这一局一共翻了 ${G.drawn} 张牌 · ${G.names[0]} ${G.hearts[0]} 颗心，${G.names[1]} ${G.hearts[1]} 颗心`;
 }
 
-$('#go-setup').onclick = () => go('setup');
-$('#go-resume').onclick = () => go('game');
-$('#start').onclick = newGame;
-$('#again').onclick = newGame;
-$('#open-rules').onclick = () => openSheet('#rules');
+$('#go-resume').onclick = () => go('play');
+$('#start').onclick = () => newGame(setupGame);
+$('#again').onclick = () => newGame(G.game);
+$('#open-rules').onclick = () => openRules(G.game);
 
 function start(data) {
   const sv = data && data.P ? data : load();
   if (sv.P) P = Object.assign(P, sv.P);
-  if (sv.G && sv.G.winner == null && Array.isArray(sv.G.deck)) G = sv.G;
-  go(data && data.screen && (data.screen !== 'game' || G) && data.screen !== 'win' ? data.screen : 'home');
+  if (!P.seenRules || typeof P.seenRules !== 'object') P.seenRules = P.seenRules ? { cards: true } : {};
+  if (!Array.isArray(P.imported)) P.imported = [];
+  if (sv.G && sv.G.winner == null && sv.G.names) { G = sv.G; if (!G.game) { G.game = 'cards'; G.deckName = G.deckName || ''; } if (!R[G.game]) G = null; }
+  go(data && data.screen === 'play' && G ? 'play' : 'home');
 }
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) hot.snapshot(() => ({ P, G, screen }));
