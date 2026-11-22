@@ -312,6 +312,8 @@ textarea{width:100%;min-height:190px;border:0;border-radius:var(--r-m);backgroun
   <p class="hint">选择题库文件（.json），里面的每一套内容都会出现在对应游戏的“选一套内容”里。内容只保存在这部手机上。</p>
   <p class="hint" id="import-state"></p>
   <label class="btn filebtn">选择题库文件<input type="file" id="import-file" accept=".json,.txt,application/json,text/plain"></label>
+  <textarea id="import-paste" style="min-height:96px" placeholder="选不了文件的话：打开题库文件，全选并复制，再粘贴到这里" aria-label="粘贴题库文字"></textarea>
+  <button class="btn soft" id="import-paste-go">导入粘贴的内容</button>
   <button class="btn soft" id="import-clear" hidden>删除已导入的题库</button>
   <button class="btn quiet" data-close>关闭</button>
 </div></div>
@@ -466,18 +468,20 @@ $('#import-file').addEventListener('change', e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   const rd = new FileReader();
   rd.onerror = () => toast('文件读不出来，再试一次');
-  rd.onload = () => {
-    let data; try { data = JSON.parse(rd.result); } catch (err) { return toast('这不是题库文件'); }
+  rd.onload = () => importText(rd.result);
+  rd.readAsText(f);
+});
+function importText(text) {
+    let data; try { data = JSON.parse(text); } catch (err) { return toast('这不是题库文件'); }
     if (!data || data.format !== IMPORT_FORMAT || !Array.isArray(data.decks)) return toast('这不是题库文件');
     const clean = a => Array.isArray(a) ? [...new Set(a.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean))] : [];
     const decks = data.decks.filter(x => x && GAMES[x.game] && typeof x.name === 'string').map(x => ({ name: x.name.slice(0, 12), game: x.game, d: clean(x.d), s: clean(x.s) })).filter(x => x.d.length + x.s.length >= 3);
     if (!decks.length) return toast('文件里没有可用的内容');
     const before = P.imported; P.imported = decks;
     if (!save()) { P.imported = before; return toast('手机存储空间不够，没有导入'); }
-    importState(); renderSetup(); toast(`已导入 ${decks.length} 套内容`);
-  };
-  rd.readAsText(f);
-});
+    importState(); renderSetup(); toast(`已导入 ${decks.length} 套内容`); $('#import-paste').value = '';
+}
+$('#import-paste-go').onclick = () => { const v = $('#import-paste').value.trim(); if (!v) return toast('先把题库文字粘贴进来'); importText(v); };
 
 /* ---------- 三个游戏共用的界面零件 ---------- */
 function fill(node, text, ta) { text.split('{ta}').forEach((part, i) => { if (i) node.append(el('b', '', ta)); node.append(part); }); }
