@@ -17,6 +17,7 @@ tools/imagegen.py          调用图像 API 出图（带安全与预算保护）
 tools/videogen.py          调用视频 API（Sora）生成人物动作短片（同样的安全与预算保护）
 tools/sprites.py           序列图/视频 → 去背景、对齐、找循环的动画帧；生成动画对比页
 tools/imagegen.config.json 模型名、预算上限（图片按张、视频按秒）
+demos/hd2d-train.html      HD-2D 画风演示：代码绘制的像素画 + 实时光影，浏览器直接打开（不调用 API）
 art/anchor/                选定的风格锚点图
 art/chars/                 选定的角色立绘（动画的起点）
 art/raw/<批次>/            生成的原图/视频 + 每个文件的参数记录 (.json)

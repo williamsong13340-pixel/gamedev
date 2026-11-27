@@ -41,7 +41,7 @@ body{margin:0;background:var(--night);color:var(--snow);overflow:hidden;font-fam
 <div class="hud ctrl"><button type="button" id="fxBtn" aria-pressed="true">光影：开</button><button type="button" id="pauseBtn" aria-pressed="false">暂停</button></div>
 <div id="msg">正在生成画面…</div>
 <script>
-(function(){
+function hd2dMain(){
 'use strict';
 const params = new URLSearchParams(location.search);
 const CAPTURE = params.has('capture');
@@ -1216,6 +1216,8 @@ const canvas = document.getElementById('c');
 const ctxOpts = {antialias: false, alpha: false, depth: false, stencil: false, premultipliedAlpha: false, preserveDrawingBuffer: CAPTURE, powerPreference: 'high-performance'};
 const gl = (params.has('gl1') ? null : canvas.getContext('webgl2', ctxOpts)) || canvas.getContext('webgl', ctxOpts);
 if (!gl){ document.getElementById('msg').textContent = '这个浏览器不支持 WebGL，暂时无法显示画面'; return; }
+canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); document.getElementById('msg').hidden = false; document.getElementById('msg').textContent = '画面中断了，正在恢复…'; });
+canvas.addEventListener('webglcontextrestored', () => location.reload());
 
 const GL_NOISE = `
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -1878,5 +1880,10 @@ if (CAPTURE){
   setTimeout(() => hintEl.classList.add('fade'), 9000);
   requestAnimationFrame(frame);
 }
-})();
+}
+// paint the loading text first, then build the scene
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  try { hd2dMain(); }
+  catch (err){ console.error(err); const m = document.getElementById('msg'); m.hidden = false; m.textContent = '画面初始化失败：' + err.message; }
+}));
 </script>
