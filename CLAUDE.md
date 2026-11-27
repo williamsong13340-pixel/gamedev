@@ -22,6 +22,7 @@
 - 已完成：出图和视频脚本、模板图、动作骨架图（走路、拧螺栓）、提示词库、风格规范。全部用模拟接口测试通过。
 - 还没做：从未真正调用过 API，一张图都还没生成。
 - 用户说改不了上一个会话的云环境设置，但已经自己配置好了 key（可能新建了环境）。
+- 2026-11-27：用户想看能力，做了一个 **HD-2D 演示** `demos/hd2d-train.html`：像素画全部由代码绘制，加实时光影（景深、辉光、窗光投在雪地上、车头灯光束、炉火闪光、焊接闪光、雪、烟、极光），手机横竖屏都能看，可拖动看整列车，右下角可关掉光影对比。没调用出图 API，没花钱。已发布为 Artifact：https://claude.ai/artifact/Jt9UF3nQVntjRy273qZFMU 。截图在 `art/preview/hd2d-*.jpg`。用户还没表态要不要把"像素 + 实时光影"作为正式画风。
 
 ## 下一步
 
@@ -79,3 +80,4 @@ python3 tools/imagegen.py --check
 - 全部工作在分支 `ccr-12c7c891-s3zgy9` 上（它也是仓库默认分支）。如果新会话的分支上没有这些文件，先 `git fetch origin ccr-12c7c891-s3zgy9` 再合并。
 - 尚未验证：Sunburst 是否支持透明背景（`background: transparent`）、`1536x1024` 尺寸、多张输入图（`image[]`）。
 - 待机呼吸、眨眼这类细微动作不要逐帧画，用一张图加代码轻微缩放和摆动来做（见 art-bible 第 6 节）。
+- HD-2D 演示：网址加 `?capture` 后可在 Playwright 里调用 `window.__render(t, fx, pan)` 渲染任意时刻（截图、录视频用）；`?gl1` 强制走 WebGL1；`?debug` 显示帧率。容器里的 Chromium 用软件渲染 WebGL2，约 0.6–2 秒一帧，所以录视频要放后台跑。配色遵守 art-bible 色板（冷色世界，暖色只给光源）。
