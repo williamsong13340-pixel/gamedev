@@ -30,6 +30,9 @@ body{margin:0;background:var(--night);color:var(--snow);overflow:hidden;font-fam
 .ctrl button[aria-pressed="true"]{border-color:rgba(242,166,90,.55);color:var(--amber-ink)}
 .ctrl button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .hint{left:calc(env(safe-area-inset-left,0px) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);font-size:11px;letter-spacing:.12em;color:var(--snow-dim);text-shadow:0 1px 8px rgba(0,0,0,.8);transition:opacity 1.2s ease}
+.carlabel{top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);text-align:center;width:max-content;max-width:calc(100% - 32px);transition:opacity .5s ease}
+.carlabel b{display:block;font-family:var(--font-title);font-weight:600;font-size:17px;letter-spacing:.3em;text-shadow:0 1px 12px rgba(0,0,0,.75)}
+.carlabel span{display:block;margin-top:4px;font-size:11.5px;letter-spacing:.08em;color:var(--snow-dim);text-shadow:0 1px 8px rgba(0,0,0,.85)}
 .fade{opacity:0}
 #msg{position:fixed;inset:0;display:grid;place-items:center;font-size:13px;letter-spacing:.14em;color:var(--snow-dim);z-index:3;pointer-events:none}
 #fps{position:fixed;top:4px;right:6px;font:11px/1 monospace;color:#9fb;z-index:4}
@@ -38,7 +41,8 @@ body{margin:0;background:var(--night);color:var(--snow);overflow:hidden;font-fam
 <canvas id="c" aria-label="像素风 HD-2D 场景：冰原上一列亮着暖灯的列车在夜里行驶"></canvas>
 <div class="hud title" id="title"><h1>冰原列车</h1><p>HD-2D 光影 · 画面全部由代码实时绘制</p></div>
 <div class="hud hint" id="hint">左右拖动画面，沿着列车看</div>
-<div class="hud ctrl"><button type="button" id="fxBtn" aria-pressed="true">光影：开</button><button type="button" id="pauseBtn" aria-pressed="false">暂停</button></div>
+<div class="hud carlabel fade" id="carLabel" aria-live="polite"><b id="carName"></b><span id="carDesc"></span></div>
+<div class="hud ctrl"><button type="button" id="tourBtn" aria-pressed="true">导览：开</button><button type="button" id="fxBtn" aria-pressed="true">光影：开</button><button type="button" id="pauseBtn" aria-pressed="false">暂停</button></div>
 <div id="msg">正在生成画面…</div>
 <script>
 function hd2dMain(){
@@ -53,7 +57,7 @@ const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: red
    Camera looks at the train side from distance D; horizon row 100;
    ground directly under the train side is row 208.
    ===================================================================== */
-const TY0 = 100, TH = 112;                 // train buffer covers art rows 100..211
+const TY0 = 76, TH = 136;                  // train buffer covers art rows 76..211
 const HORIZON = 100, GROUND_Y = 208, HCAM = GROUND_Y - HORIZON;
 const D = 400;                             // camera -> train side distance (world px)
 const SPEED = 128;                         // train speed, art px / s at the train's depth
@@ -657,6 +661,155 @@ const pCab = {
   }
 };
 
+// ---- more liveries for the train's cars (night values) ----
+const GN = ['#0f1a12','#16261a','#1f3524','#2a4630','#36583c','#466e4a','#5a8658'].map(C);   // sage green
+const TL = ['#0b1a1e','#10272d','#17363e','#1f4750','#285a64','#336e7a','#40848e'].map(C);   // teal
+const NV = ['#0c1020','#121a30','#1a2442','#233056','#2e3e6c','#3c4f82'].map(C);             // navy
+const IV = ['#3a3834','#55524c','#726e66','#908a80','#aca69a','#c8c2b4','#e0dacb'].map(C);   // ivory
+const MT = ['#1c3a36','#285450','#36706a','#4a8c84'].map(C);                                 // mint
+const OC = ['#2e2008','#46300e','#604414','#7c5a1c','#987026','#b48a34','#cca44a'].map(C);   // mustard
+const CH = ['#14161a','#1c1f25','#262a31','#31363e','#3e444d','#4e555f','#626a75'].map(C);   // charcoal steel
+const SL = ['#2a2c34','#33363f','#3d414b','#484c57','#545966','#666c7a'].map(C);             // slate shingles
+const TN = ['#2c2016','#3e2e20','#52402c','#685238','#7e6646','#947a56'].map(C);             // weathered planks
+const ORG = ['#6a2a0c','#a8481a','#d86a2a'].map(C);
+const AQ = ['#08262c','#0c343c','#10444e','#155662','#1b6a76','#24808a','#32969e','#48aeb0','#6cc6c2','#9adcd4'].map(C);
+const CLN = ['#2a2622','#3e3832','#585048','#766c60','#968a7c','#b4a898','#cfc4b4','#e6dccc','#f6eee2','#fffaf2'].map(C);
+const BOOKS = ['#8a2a22','#2a4a6a','#6a5a24','#2e5a3a','#7a4a6a','#c8a060','#4a3a2a','#a85a2a','#d8c8a0'].map(C);
+const pAqua = {
+  stat(){},
+  dyn(W, t, st, win){
+    const s = win.seed || 0;
+    for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++){
+      let v = 0.8 - y / W.h * 0.62 + 0.08 * Math.sin(x * 0.9 + t * 2.1 + s) * Math.sin(y * 0.7 - t * 1.6 + s * 2);
+      if (y < 4 && Math.sin(x * 1.3 + t * 3 + s) > 0.5) v += 0.14;
+      W.p(x, y, ramp(AQ, v, x + W.x0, y + W.y0), 0.16 + 0.42 * v);
+    }
+    for (const kx of [2, 11]) for (let j = 0; j < 6; j++) W.p(kx + Math.round(Math.sin(t * 1.5 + j * 0.6 + kx) * 0.8), W.h - 1 - j, j % 2 ? C('#2e7a4a') : C('#3e9a5a'), 0.1);
+    for (let f = 0; f < 2; f++){
+      const dir = (s + f) % 2 ? 1 : -1, sp = 3 + f * 1.7 + s * 0.4, span = W.w + 8;
+      const fx = Math.round(mod(t * sp * dir + s * 9 + f * 13, span) - 4), fy = 5 + f * 4 + Math.round(Math.sin(t * 2 + f + s));
+      const col = f ? C('#ffb060') : C('#e0eef0'), fin = f ? C('#e07830') : C('#9ab8c0');
+      W.p(fx, fy, col, 0.3); W.p(fx - dir, fy, col, 0.3); W.p(fx - 2 * dir, fy, col, 0.3); W.p(fx - dir, fy - 1, fin, 0.2); W.p(fx - 3 * dir, fy - 1, fin, 0.2); W.p(fx - 3 * dir, fy + 1, fin, 0.2);
+    }
+    for (let b = 0; b < 3; b++){ const ph = mod(t * 0.45 + b / 3 + s * 0.13, 1); W.p(3 + ((b * 5 + s * 3) % 9) + Math.round(Math.sin(t * 3 + b) * 0.6), W.h - 1 - ph * W.h, C('#d8f8f4'), 0.6); }
+  }
+};
+const pClinic = {
+  stat(W, win){
+    const s = win.seed || 0;
+    for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++){ const dx = x - 14, dy = (y - 3) * 1.2, f = 1 / (1 + (dx * dx + dy * dy) / 200); let t = 0.3 + 0.42 * f; if (y > 13 && x % 5 === 0) t -= 0.05; W.p(x, y, ramp(CLN, t, x + W.x0, y + W.y0), 0.02 + 0.12 * f); }
+    for (let x = 0; x < W.w; x++) W.p(x, 13, CLN[5]);
+    if (s !== 1){
+      const bx = s === 0 ? 4 : 9;
+      for (let x = bx; x < bx + 16; x++){ W.p(x, 15, C('#f8f2e6')); W.p(x, 16, x < bx + 4 ? C('#f8f2e6') : MT[3]); W.p(x, 17, MT[2]); W.p(x, 18, C('#8a8e96')); }
+      for (let x = bx; x < bx + 4; x++) W.p(x, 14, C('#fffaf0'));
+      for (let y = 12; y < 22; y++){ W.p(bx - 1, y, C('#9aa0aa')); W.p(bx + 16, y, C('#9aa0aa')); }
+      for (let y = 19; y < W.h; y++){ W.p(bx, y, C('#6a6e76')); W.p(bx + 15, y, C('#6a6e76')); }
+      if (s === 2){ for (let y = 4; y < 20; y++) W.p(5, y, C('#a8aeb8')); W.p(4, 4, C('#a8aeb8')); W.p(6, 4, C('#a8aeb8')); W.p(5, 5, C('#cfe8f0')); W.p(5, 6, C('#cfe8f0')); }
+      if (s === 0){ for (let y = 7; y < 12; y++) W.p(24, y, C('#3a6a3a')); W.p(23, 8, C('#4a8a4a')); W.p(25, 9, C('#4a8a4a')); for (let x = 23; x < 26; x++) W.p(x, 12, C('#a85a3a')); }
+    } else {
+      for (let y = 2; y < 12; y++) for (let x = 3; x < 13; x++){ let c = (x === 3 || x === 12 || y === 2 || y === 11) ? C('#cfc8bc') : C('#e8f0f0'); if (y === 6) c = C('#cfc8bc'); W.p(x, y, c, 0.1); }
+      const bot = [C('#c87a30'), C('#4a8a5a'), C('#4a6aa8'), C('#a83a3a'), C('#d8c060')];
+      for (const r of [3, 7]) for (let x = 4; x < 12; x += 2){ const c = bot[(x + r) % bot.length]; W.p(x, r + 1, c, 0.1); W.p(x, r + 2, c, 0.1); W.p(x, r, mixC(c, C('#ffffff'), 0.4), 0.1); }
+      for (let x = 15; x < 27; x++){ W.p(x, 15, LIT[6]); W.p(x, 16, LIT[3]); } for (let y = 17; y < W.h; y++){ W.p(16, y, LIT[2]); W.p(25, y, LIT[2]); }
+      W.p(17, 14, C('#f0e8d8')); W.p(18, 14, C('#f0e8d8')); W.p(19, 14, C('#d8d0c0'));
+    }
+  },
+  dyn(W, t, st, win){
+    const s = win.seed || 0, lx = s === 1 ? 23 : 14;
+    W.p(lx, 0, LIT[2]); W.p(lx - 1, 1, C('#d8d0c4')); W.p(lx, 1, C('#e8e0d4')); W.p(lx + 1, 1, C('#d8d0c4')); W.p(lx, 2, C('#fffaf0'), 1.0); W.p(lx - 1, 2, CLN[8], 0.8); W.p(lx + 1, 2, CLN[8], 0.8);
+    if (s === 1){ W.p(21, 12, C('#e8d8a0'), 0.5); W.p(22, 12, C('#fff4c8'), 0.9); W.p(21, 13, C('#7a5a3a')); W.p(22, 13, C('#7a5a3a')); }
+    curtains(W, [C('#a29a8c'), C('#c0b8aa'), C('#dcd4c4')], 3);
+  }
+};
+const pLib = {
+  stat(W, win){
+    const s = win.seed || 0;
+    room(W, s === 1 ? 9 : 10, s === 1 ? 20 : 3, {rail: 99, r2: 230});
+    const top = s === 1 ? 2 : 2, bottom = s === 1 ? 18 : 30;
+    for (let sy = 6; sy < bottom; sy += 6){
+      for (let x = 0; x < W.w; x++){ W.p(x, sy, LIT[5]); W.p(x, sy + 1, LIT[2]); }
+      for (let x = 1; x < W.w - 1; x++){ if (ih(x, sy, 41 + s) < 0.1) continue; const h = 3 + Math.floor(ih(x, sy, 43 + s) * 3); const c = mixC(BOOKS[Math.floor(ih(x, sy, 47 + s) * BOOKS.length)], LIT[8], 0.12); for (let y = sy - h; y < sy; y++) W.p(x, y, c); }
+    }
+    if (s === 0) W.line(3, 29, 13, 2, BR[4]), W.line(4, 29, 14, 2, BR[2]);
+    if (s === 1){ for (let x = 1; x < 19; x++){ W.p(x, 22, LIT[7]); W.p(x, 23, LIT[3]); } for (let y = 24; y < 30; y++){ W.p(3, y, LIT[1]); W.p(16, y, LIT[1]); } for (let x = 11; x < 15; x++) W.p(x, 21, C('#f0e2c0')); }
+    if (s === 2){ for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++){ const dx = x - 3, dy = y - 3; if (dx * dx + dy * dy > 10) continue; W.p(7 + x, 19 + y, ((x * 3 + y * 5) % 7 < 3) ? C('#4a8a5a') : C('#3a6aa8')); } W.p(10, 26, BR[3]); for (let x = 8; x < 13; x++) W.p(x, 27, BR[2]); for (let y = 28; y < 30; y++) W.p(10, y, BR[2]); }
+    if (s === 3){ for (let y = 20; y < 30; y++) for (let x = 2; x < 14; x++){ const back = x < 5, seat = y >= 25; if (!back && !seat) continue; W.p(x, y, back ? C('#8a2a2a') : (y === 25 ? C('#b04040') : C('#7a2424'))); } for (let k = 0; k < 4; k++) for (let x = 15; x < 19; x++) W.p(x, 29 - k, BOOKS[(k * 3) % BOOKS.length]); }
+  },
+  dyn(W, t, st, win){
+    const s = win.seed || 0;
+    if (s === 1){ W.p(7, 19, C('#2e6a3a'), 0.2); W.p(8, 19, C('#3e8a4a'), 0.3); W.p(9, 19, C('#2e6a3a'), 0.2); W.p(8, 20, C('#fff4d0'), 1.0); W.p(8, 21, BR[3]); }
+    else { W.p(10, 0, LIT[2]); W.p(9, 1, LIT[6]); W.p(10, 1, LIT[7]); W.p(11, 1, LIT[6]); W.p(10, 2, C('#fffaf0'), 1.0); W.p(9, 2, LIT[11], 0.8); W.p(11, 2, LIT[11], 0.8); }
+  }
+};
+const pFlywheel = {
+  stat(W){ for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++) W.p(x, y, ramp(LIT, 0.18 + 0.4 * (y / W.h), x + W.x0, y + W.y0), 0.06 + 0.2 * (y / W.h)); },
+  dyn(W, t){
+    const cx = 9, cy = 9, a = t * 2.6;
+    for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++){ const dx = x - cx, dy = y - cy, d2 = dx * dx + dy * dy; if (d2 <= 49 && d2 > 30) W.p(x, y, (dx + dy < 0) ? BR[5] : BR[3], 0.15); else if (d2 <= 4) W.p(x, y, BR[4], 0.15); }
+    for (let k = 0; k < 6; k++){ const ang = a + k * Math.PI / 3; W.line(cx + Math.cos(ang) * 1.5, cy + Math.sin(ang) * 1.5, cx + Math.cos(ang) * 5.5, cy + Math.sin(ang) * 5.5, BR[2], 0.1); }
+    W.line(cx + 6, cy - 3, W.w - 1, 2, BK[2]); W.line(cx + 6, cy + 3, W.w - 1, W.h - 3, BK[2]);
+    const g = 0.7 + 0.3 * wob(t, 31); for (let x = 0; x < W.w; x++) for (let y = W.h - 4; y < W.h; y++) W.p(x, y, mixC(W.get(x, y), C('#ff9040'), 0.35 * g * (y - W.h + 5) / 4), 0.3 * g);
+  }
+};
+const pBoiler = {
+  stat(W){
+    for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++) W.p(x, y, ramp(LIT, 0.2 + 0.35 * (1 - Math.abs(x - 12) / 14), x + W.x0, y + W.y0), 0.06);
+    for (let y = 2; y < W.h; y++) for (let x = 5; x < 20; x++) W.p(x, y, (x === 5) ? BK[4] : (x === 19 ? BK[1] : BK[2]));
+    for (let x = 0; x < W.w; x++) W.p(x, 1, CU[3]);
+    for (let y = 1; y < 12; y++) W.p(22, y, CU[2]);
+    for (let y = 13; y < W.h; y++) for (let x = 0; x < 5; x++) if (ih(x, y, 61) < 0.7) W.p(x, y, ih(x, y, 62) < 0.3 ? BK[4] : BK[1]);
+  },
+  dyn(W, t){
+    fire(W, 9, 9, 7, 5, t, 63);
+    for (let x = 8; x < 17; x++){ W.p(x, 8, BK[5]); W.p(x, 14, BK[5]); }
+    W.p(8, 4, C('#fff0c8'), 0.9); W.p(9, 4, C('#ffe0a0'), 0.7); W.p(15, 4, C('#fff0c8'), 0.9); W.p(16, 4, C('#ffe0a0'), 0.7);
+  }
+};
+const pCaboose = {
+  stat(W, win){
+    room(W, 6, 2, {rail: 8, r2: 110});
+    if ((win.seed || 0) === 0){ for (let y = 6; y < W.h; y++) for (let x = 6; x < 11; x++){ if (y < 8 && (x === 6 || x === 10)) continue; W.p(x, y, x === 6 ? CP.I : CP.i); } for (let y = 0; y < 6; y++){ W.p(8, y, CP.i); W.p(9, y, CP.I); } }
+    else { for (let y = 2; y < 7; y++) for (let x = 1; x < 8; x++) W.p(x, y, (x + y) % 3 ? C('#e8d8b0') : C('#c8b080')); W.line(2, 3, 6, 5, C('#a83a2a')); for (let x = 0; x < W.w; x++){ W.p(x, 10, LIT[6]); W.p(x, 11, LIT[2]); } for (let x = 7; x < 11; x++) for (let y = 7; y < 10; y++) W.p(x, y, C('#4a3a30')); }
+  },
+  dyn(W, t, st, win){
+    if ((win.seed || 0) === 0) fire(W, 7, 9, 3, 2, t, 71);
+    else { const d = 0.7 + 0.3 * wob(t * 0.5, 9); W.p(8, 8, C('#9affc8'), d); W.p(9, 8, C('#7ae8b0'), d); }
+    curtains(W, CUR.mustard, 2);
+  }
+};
+const pCupola = {
+  stat(W){ for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++) W.p(x, y, ramp(LIT, 0.5 + 0.35 * (1 - y / W.h), x + W.x0, y + W.y0), 0.3); W.p(3, W.h - 2, LIT[2]); W.p(4, W.h - 2, LIT[2]); W.p(3, W.h - 1, LIT[1]); },
+  dyn(){}
+};
+
+const pFlat = {
+  stat(W, win){
+    const s = win.seed || 0;
+    if (!win.lit){
+      for (let y = 0; y < W.h; y++) for (let x = 0; x < W.w; x++) W.p(x, y, ramp(LIT, 0.14 + 0.1 * (1 - y / W.h), x + W.x0, y + W.y0), 0.03);
+      const cc = [CUR.red, CUR.mustard, CUR.rose, CUR.sage, CUR.blue][s % 5];
+      for (let y = 1; y < W.h; y++) for (let x = 0; x < W.w; x++) if ((x + (y >> 2)) % 3 !== 0 || y < 2) W.p(x, y, mulC(cc[x % 2 ? 0 : 1], 0.55), 0.06);
+      for (let x = 0; x < W.w; x++) W.p(x, 0, BR[2]);
+      return;
+    }
+    const lx = 3 + (s * 5) % (W.w - 6);
+    room(W, lx, 2, {rail: Math.round(W.h * 0.6), r2: 70, tone: ((s * 3) % 4) * 0.02 - 0.03});
+    const v = s % 4, fl = W.h - 1;
+    if (v === 0){ for (let x = 1; x < W.w - 2; x++){ W.p(x, fl - 3, C('#e8dcc4')); W.p(x, fl - 2, [C('#9a3a2a'), C('#3e5a7a'), C('#5e7040')][s % 3]); W.p(x, fl - 1, LIT[2]); } for (let x = 1; x < 4; x++) W.p(x, fl - 4, C('#f4ecdc')); }
+    if (v === 1){ for (let x = 2; x < W.w - 2; x++) W.p(x, 6, LIT[6]); for (let x = 2; x < W.w - 2; x += 2){ const c = mixC(BOOKS[(x + s) % BOOKS.length], LIT[8], 0.15); W.p(x, 5, c); W.p(x, 4, c); } W.p(W.w - 4, fl - 2, C('#3a6a3a')); W.p(W.w - 5, fl - 3, C('#4a8a4a')); W.p(W.w - 3, fl - 3, C('#4a8a4a')); W.p(W.w - 4, fl - 1, C('#a85a3a')); }
+    if (v === 2){ for (let y = 3; y < 7; y++) for (let x = 3; x < 7; x++) W.p(x, y, (y === 3 || x === 3) ? LIT[2] : C('#7a9aaa')); for (let x = 1; x < W.w - 1; x++){ W.p(x, fl - 2, LIT[6]); W.p(x, fl - 1, LIT[3]); } W.p(W.w - 5, fl - 3, C('#e8dcc8')); W.p(W.w - 4, fl - 3, C('#d8ccb8')); }
+    if (v === 3){ for (let y = fl - 5; y <= fl; y++) for (let x = W.w - 6; x < W.w - 1; x++) W.p(x, y, (y === fl - 5) ? C('#b04040') : C('#7a2a2a')); for (let x = 2; x < 6; x++) W.p(x, 3, C('#d8a050')); }
+  },
+  dyn(W, t, st, win){
+    if (!win.lit) return;
+    const s = win.seed || 0, lx = 3 + (s * 5) % (W.w - 6);
+    W.p(lx, 0, LIT[2]); W.p(lx - 1, 1, LIT[6]); W.p(lx, 1, LIT[7]); W.p(lx + 1, 1, LIT[6]); W.p(lx, 2, C('#fffaf0'), 1.0);
+    if (s % 5 === 2){ const tw = 0.6 + 0.4 * Math.sin(t * 2 + s); for (let x = 1; x < W.w - 1; x += 2) W.p(x, 1 + (x % 4 === 1 ? 1 : 0), mixC(LIT[4], C(['#ffe9c2', '#ff9a8a', '#ffc070'][x % 3]), tw), 0.7 * tw); }
+    curtains(W, [CUR.red, CUR.mustard, CUR.rose, CUR.sage, CUR.blue][(s * 2 + 1) % 5], 2);
+  }
+};
+
 /* ---------- static car bodies ---------- */
 function carCanvas(w){ return {col: new PC(w + 8, TH), emi: new PC(w + 8, TH), ox: 4}; }
 function painterFor(cv){
@@ -727,20 +880,23 @@ function wreath(S, E, cx, cy){
   S(cx - 1, cy + 3, C('#c8302a')); S(cx, cy + 3, C('#e04a3a')); S(cx + 1, cy + 3, C('#c8302a')); S(cx, cy + 4, C('#a82a22'));
 }
 function roofTop(S, E, opts){
-  for (let x = -1; x <= CAR_W; x++) for (let y = 128; y <= 134; y++) S(x, y, ramp(RF, (y - 128) / 6, x, y));
+  const w = opts.w || CAR_W, pal = opts.pal || RF, x0 = opts.x0 === undefined ? -1 : opts.x0;
+  for (let x = x0; x <= w; x++) for (let y = 128; y <= 134; y++) S(x, y, ramp(pal, (y - 128) / 6, x, y));
   if (opts.clerestory){
     for (let x = 22; x <= 161; x++) for (let y = 121; y <= 127; y++) S(x, y, y === 121 ? RF[1] : (y === 127 ? RF[5] : (y === 122 ? RF[2] : RF[3])));
     for (let x = 26; x + 4 <= 160; x += 10) for (let y = 123; y <= 125; y++) for (let i = 0; i < 4; i++){ const c = y === 123 ? C('#e9a65e') : C('#ffd89a'); S(x + i, y, c); E(x + i, y, mulC(C('#ffd89a'), 0.55)); }
     snowTop(S, 21, 162, 120, opts.seed + 1, 2);
-    snowTop(S, -1, 21, 127, opts.seed + 2, 2); snowTop(S, 162, CAR_W, 127, opts.seed + 3, 2);
-  } else snowTop(S, -1, CAR_W, 127, opts.seed + 2, 2);
-  icicles(S, -1, CAR_W, 135, opts.seed + 4, 0.05, 2);
+    snowTop(S, x0, 21, 127, opts.seed + 2, 2); snowTop(S, 162, w, 127, opts.seed + 3, 2);
+  } else snowTop(S, x0, w, 127, opts.seed + 2, 2);
+  icicles(S, x0, w, 135, opts.seed + 4, 0.05, 2);
 }
-function underframe(S, L, seed){
-  for (let x = 3; x < CAR_W - 3; x++){ S(x, 191, P.k3); S(x, 192, P.k1); S(x, 193, P.k1); }
-  L(46, 193, 62, 198, P.k1); L(62, 198, 122, 198, P.k1); L(122, 198, 138, 193, P.k1);
-  for (const [bx0, bx1] of [[66, 88], [96, 118]]) for (let x = bx0; x <= bx1; x++) for (let y = 194; y <= 199; y++){ let c = y === 194 ? P.k5 : (y === 199 ? P.k1 : P.k3); if (x === bx0 || x === bx1) c = P.k2; if (y === 196 && x % 4 === 2) c = P.k6; S(x, y, c); }
-  icicles(S, 66, 118, 200, seed + 5, 0.06, 2);
+function underframe(S, L, seed, w){
+  w = w || CAR_W;
+  for (let x = 3; x < w - 3; x++){ S(x, 191, P.k3); S(x, 192, P.k1); S(x, 193, P.k1); }
+  if (w >= 140){ L(46, 193, 62, 198, P.k1); L(62, 198, w - 62, 198, P.k1); L(w - 62, 198, w - 46, 193, P.k1); }
+  const mm = Math.round(w / 2), bw = Math.min(22, Math.round((w - 100) / 2));
+  if (bw > 5) for (const [bx0, bx1] of [[mm - bw - 4, mm - 4], [mm + 4, mm + bw + 4]]) for (let x = bx0; x <= bx1; x++) for (let y = 194; y <= 199; y++){ let c = y === 194 ? P.k5 : (y === 199 ? P.k1 : P.k3); if (x === bx0 || x === bx1) c = P.k2; if (y === 196 && x % 4 === 2) c = P.k6; S(x, y, c); }
+  icicles(S, mm - 28, mm + 28, 200, seed + 5, 0.06, 2);
 }
 function steps(S, x0){ for (let x = x0 + 1; x < x0 + 10; x++){ S(x, 192, P.k11); S(x, 193, P.k3); S(x, 196, P.k11); S(x, 197, P.k3); } for (const sx of [x0 + 1, x0 + 9]) for (let y = 191; y <= 197; y++) S(sx, y, P.k2); }
 
@@ -800,22 +956,22 @@ function buildLiving(){
   const flick = [t => 0.88 + 0.12 * wob(t, 1), t => 0.93 + 0.07 * wob(t * 1.3, 2), () => 0.9, t => 0.85 + 0.15 * wob(t * 0.9, 4), () => 0.82];
   wins.forEach((w, i) => { w.painter = painters[i]; w.light = {c: lightC[i], k: 0.9, f: flick[i], z: 22}; });
   doors.forEach(d => { d.painter = pDoor; });
-  return {kind: 'living', w: CAR_W, cv, wins: wins.concat(doors), lamps, bogies: [30, 154], chimney: {x: 150.5, y: 106}, bulbs};
+  return {kind: 'living', w: CAR_W, cv, wins: wins.concat(doors), lamps, bogies: [30, 154], bulbs, smokes: [{x: 150.5, y: 106, scale: 0.45, warm: 0.5, dark: 1.25}], embers: [{x: 150.5, y: 107, boost: 0.3, spread: 2}], label: {name: '生活车厢', desc: '厨房、餐桌、窗边的猫、阅读角和上下铺'}};
 }
 
 function buildGreenhouse(){
   const cv = carCanvas(CAR_W), {S, E, CLR, L} = painterFor(cv);
   const GT = 121, GB = 171, X0 = 4, X1 = 179;
-  for (let y = 172; y <= 190; y++) for (let x = 0; x < CAR_W; x++){ let c = ramp(TR, 0.62 - (y - 172) / 18 * 0.4, x, y); if (x % 23 === 0) c = TR[1]; if (y === 178 && x % 8 === 4) c = BR[4]; S(x, y, c); }
-  for (let x = 0; x < CAR_W; x++){ S(x, 171, BR[5]); S(x, 172, BR[2]); S(x, 185, BR[3]); S(x, 186, BR[1]); S(x, 188, BR[2]); S(x, 189, TR[1]); S(x, 190, BK[1]); }
+  for (let y = 172; y <= 190; y++) for (let x = 0; x < CAR_W; x++){ let c = ramp(GN, 0.66 - (y - 172) / 18 * 0.42, x, y); if (x % 23 === 0) c = GN[1]; if (y === 178 && x % 8 === 4) c = BR[4]; S(x, y, c); }
+  for (let x = 0; x < CAR_W; x++){ S(x, 171, BR[5]); S(x, 172, BR[2]); S(x, 185, BR[3]); S(x, 186, BR[1]); S(x, 188, BR[2]); S(x, 189, GN[1]); S(x, 190, BK[1]); }
   underframe(S, L, 90);
   for (let y = GT; y <= GB - 1; y++) for (let x = X0; x <= X1; x++) CLR(x, y);
-  for (let y = GT - 2; y <= GB; y++) for (let i = 0; i < 4; i++){ S(i, y, i === 0 ? CR[4] : CR[2]); S(CAR_W - 1 - i, y, i === 0 ? CR[1] : CR[2]); }
+  for (let y = GT - 2; y <= GB; y++) for (let i = 0; i < 4; i++){ S(i, y, i === 0 ? IV[6] : IV[4]); S(CAR_W - 1 - i, y, i === 0 ? IV[3] : IV[4]); }
   const mull = [X0 + 43, X0 + 87, X0 + 131];
-  for (const mx of mull) for (let y = GT - 1; y <= GB; y++){ S(mx, y, CR[4]); S(mx + 1, y, CR[1]); }
-  for (let x = X0; x <= X1; x += 11) for (let y = GT; y < 135; y++) S(x, y, CR[1]);
-  for (let x = X0; x <= X1; x++) S(x, 135, CR[2]);
-  for (let x = -1; x <= CAR_W; x++){ S(x, GT - 1, CR[4]); S(x, GT - 2, CR[2]); }
+  for (const mx of mull) for (let y = GT - 1; y <= GB; y++){ S(mx, y, IV[6]); S(mx + 1, y, IV[3]); }
+  for (let x = X0; x <= X1; x += 11) for (let y = GT; y < 135; y++) S(x, y, IV[3]);
+  for (let x = X0; x <= X1; x++) S(x, 135, IV[4]);
+  for (let x = -1; x <= CAR_W; x++){ S(x, GT - 1, IV[6]); S(x, GT - 2, IV[4]); }
   snowTop(S, -1, CAR_W, GT - 3, 81, 2);
   for (let k = 0; k < 9; k++){ const sx = X0 + 6 + Math.floor(ih(k, 1, 82) * 160), sw = 4 + Math.floor(ih(k, 2, 83) * 10), sh = 1 + Math.floor(ih(k, 3, 84) * 3); for (let i = 0; i < sw; i++){ const hh = Math.max(1, Math.round(sh * Math.sin((i + 0.5) / sw * Math.PI))); for (let j = 0; j < hh; j++) S(sx + i, GT + j, j === 0 ? P.k12 : P.k10); } }
   for (let x = X0; x <= X1; x++) if (ih(x, 4, 85) < 0.5) S(x, GB - 1, C('#f2e6d6'));
@@ -826,51 +982,46 @@ function buildGreenhouse(){
   const glass = {x: X0, y: GT, w: X1 - X0 + 1, h: GB - GT, painter: pGreen};
   const panes = [[X0, mull[0]], [mull[0] + 2, mull[1]], [mull[1] + 2, mull[2]], [mull[2] + 2, X1 + 1]];
   const lightWins = panes.map(([a, b]) => ({x: a, y: GT, w: b - a, h: GB - GT, light: {c: [1.0, 0.80, 0.70], k: 0.72, f: () => 1.0, z: 24}}));
-  return {kind: 'greenhouse', w: CAR_W, cv, wins: [glass], lightWins, lamps, bogies: [30, 154], bulbs};
+  return {kind: 'greenhouse', w: CAR_W, cv, wins: [glass], lightWins, lamps, bogies: [30, 154], bulbs, label: {name: '温室车厢', desc: '种蔬菜、番茄和香草，全车人的菜园'}};
 }
 
 function buildWorkshop(){
-  const cv = carCanvas(CAR_W), {S, E, CLR, L} = painterFor(cv);
-  for (let y = 137; y <= 190; y++) for (let x = 0; x < CAR_W; x++){
-    const pv = ih(Math.floor(x / 4), 5, 41);
-    let t = 0.52 + (pv - 0.5) * 0.22 - (y - 137) / 53 * 0.3;
-    if (y <= 141) t += 0.22 - (y - 137) * 0.05;
-    let c = ramp(TR, t, x, y);
-    if (x % 4 === 0) c = TR[1];
-    S(x, y, c);
-  }
-  for (let x = 0; x < CAR_W; x++){ S(x, 135, CR[4]); S(x, 136, CR[2]); S(x, 176, CR[3]); S(x, 177, CR[1]); S(x, 188, CR[2]); S(x, 189, TR[1]); S(x, 190, BK[1]); }
+  const w = CAR_W, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  paintBody(S, w, 137, 190, CH, {t0: 0.66, drop: 0.42, glowTop: true, d2: true, seams: 30});
+  for (let x = 2; x < w; x += 4){ S(x, 140, CH[6]); S(x, 181, CH[6]); }
+  trimRow(S, w, 135, ORG[2]); trimRow(S, w, 136, ORG[0]); trimRow(S, w, 176, ORG[1]); trimRow(S, w, 177, ORG[0]); trimRow(S, w, 188, CH[3]); trimRow(S, w, 189, CH[0]); trimRow(S, w, 190, BK[1]);
   const wins = [];
   for (const [wx, painter] of [[24, pWorkA], [126, pPantry]]){
     const WW = 34, WT = 146, WB = 167;
-    for (let x = wx - 2; x <= wx + WW + 1; x++){ S(x, WT - 3, CR[4]); S(x, WT - 2, CR[2]); S(x, WB + 1, CR[5]); S(x, WB + 2, CR[1]); }
-    for (let y = WT - 2; y <= WB + 1; y++){ S(wx - 1, y, CR[3]); S(wx + WW, y, CR[1]); }
-    for (let y = WT; y <= WB; y++) for (let x = wx; x < wx + WW; x++) CLR(x, y);
-    for (let x = wx; x < wx + WW; x++) S(x, 152, CR[2]);
-    for (let y = WT; y <= WB; y++) S(wx + 17, y, CR[2]);
-    windowBox(S, E, wx - 1, wx + WW, WB + 3, wx);
+    rectWindow(S, E, CLR, wx, WT, WW, WB - WT + 1, CH[6], CH[1], ORG[2]);
+    for (let x = wx; x < wx + WW; x++) S(x, 152, CH[5]);
+    for (let y = WT; y <= WB; y++) S(wx + 17, y, CH[5]);
+    for (let x = wx - 1; x <= wx + WW; x++) if (ih(x, 1, 94) < 0.6){ S(x, WB, C('#f0dcc0')); E(x, WB, mulC(C('#ffd89a'), 0.28)); }
     frost(cv, wx, WT, WW, WB - WT + 1, 700 + wx, 0.5);
     const f = painter === pWorkA ? (t => 0.86 + 0.14 * wob(t * 0.9, 6)) : (t => 0.9 + 0.1 * wob(t * 0.6, 7));
-    wins.push({x: wx, y: WT, w: WW, h: WB - WT + 1, painter, light: {c: [1.0, 0.68, 0.40], k: 0.8, f, z: 16}});
+    wins.push({x: wx, y: WT, w: WW, h: WB - WT + 1, painter, light: {c: [1.0, 0.64, 0.36], k: 0.8, f, z: 16}});
   }
-  for (let y = 140; y <= 189; y++) for (let x = 68; x <= 115; x++){ let c = ramp(TR, 0.5 - (y - 140) / 49 * 0.3, x, y); if ((x - 68) % 4 === 0) c = TR[1]; S(x, y, c); }
-  for (let y = 140; y <= 189; y++){ S(68, y, CR[3]); S(69, y, CR[1]); S(114, y, CR[3]); S(115, y, CR[1]); }
-  for (let x = 68; x <= 115; x++){ S(x, 140, CR[4]); S(x, 141, CR[2]); S(x, 188, CR[3]); S(x, 189, CR[1]); }
-  L(70, 142, 113, 186, CR[3]); L(113, 142, 70, 186, CR[3]); L(71, 142, 114, 186, CR[1]); L(112, 142, 69, 186, CR[1]);
+  for (let y = 140; y <= 189; y++) for (let x = 68; x <= 115; x++){ let c = ramp2(CH, 0.62 - (y - 140) / 49 * 0.4, x, y); if ((x - 68) % 6 === 0) c = CH[1]; if ((x - 68) % 6 === 1) c = CH[5]; S(x, y, c); }
+  for (let y = 140; y <= 189; y++){ S(68, y, ORG[1]); S(115, y, ORG[0]); }
   for (let x = 66; x <= 117; x++){ S(x, 138, BR[4]); S(x, 139, BR[1]); }
   for (let y = 149; y <= 161; y++) for (let x = 85; x <= 97; x++){ const dx = x - 91, dy = y - 155, d = dx * dx + dy * dy; if (d <= 13) CLR(x, y); else if (d <= 26) S(x, y, d <= 18 ? BR[5] : BR[2]); }
-  S(110, 166, BR[5]); S(110, 167, BR[4]); S(110, 168, BR[3]);
+  for (let y = 164; y <= 170; y++) S(108, y, ORG[2]);
   wins.push({x: 87, y: 151, w: 9, h: 9, painter: pDoor});
   const lamps = [Object.assign(lanternAt(S, E, 176, 146), {pl: true}), lanternAt(S, E, 8, 146)];
-  for (let j = 0; j < 3; j++){ S(1, 182 + j, C('#ff4a3a')); S(2, 182 + j, C('#ff7a5a')); E(1, 182 + j, C('#ff3a2a')); E(2, 182 + j, C('#ff6a4a')); }
-  S(0, 181, BR[2]); S(1, 181, BR[3]); S(2, 181, BR[2]); S(3, 182, BR[2]); S(3, 183, BR[2]); S(3, 184, BR[2]);
-  roofTop(S, E, {clerestory: false, seed: 120});
-  underframe(S, L, 120);
-  for (let y = 110; y <= 127; y++){ S(143, y, CU[3]); S(144, y, CU[1]); }
-  for (let x = 141; x <= 146; x++){ S(x, 108, CU[4]); S(x, 109, CU[2]); }
-  S(143, 118, CU[4]); S(144, 118, CU[2]);
-  const bulbs = stringWire(S, 0, CAR_W - 1, 137, 23, 2, 123);
-  return {kind: 'workshop', w: CAR_W, cv, wins, lamps, tail: {x: 1.5, y: 183.5}, chimney: {x: 143.5, y: 106}, bogies: [30, 154], bulbs};
+  roofTop(S, E, {seed: 120, w});
+  // folded crane arm on the roof
+  for (let x = 22; x <= 74; x++){ S(x, 121, OC[5]); S(x, 126, OC[3]); if (x % 4 === 0) L(x, 121, x + 4, 126, OC[4]); }
+  for (let y = 121; y <= 127; y++){ S(22, y, OC[4]); S(23, y, OC[2]); }
+  for (let y = 116; y <= 127; y++){ S(20, y, CH[5]); S(21, y, CH[3]); }
+  for (let y = 127; y <= 131; y++) S(74, y, BK[3]); S(73, 132, BK[4]); S(75, 132, BK[4]);
+  snowTop(S, 24, 72, 120, 125, 1);
+  // spark vent
+  for (let y = 119; y <= 127; y++) for (let x = 138; x <= 150; x++) S(x, y, (y === 119) ? CH[6] : ((y % 2) ? CH[1] : CH[4]));
+  snowTop(S, 138, 150, 118, 126, 1);
+  const bulbs = stringWire(S, 0, w - 1, 137, 23, 2, 123);
+  for (const bl of bulbs) bl.c = [C('#ffb35a'), C('#ff9a4a'), C('#ffd27a')][Math.floor(ih(bl.x, 1, 127) * 3)];
+  underframe(S, L, 120, w);
+  return {kind: 'workshop', w, cv, wins, lamps, bogies: [30, 154], bulbs, embers: [{x: 144, y: 118, boost: 0.5, spread: 8}], label: {name: '工坊车厢', desc: '修车、打铁、做零件，也存放工具和粮食'}};
 }
 
 function buildLoco(){
@@ -943,21 +1094,261 @@ function buildLoco(){
   }
   for (let x = 142; x <= 150; x++){ PS(x, 164, P.k12); if (ih(x, 1, 316) < 0.6) PS(x, 163, P.k13); }
   for (let y = 166; y <= 203; y++){ const v = (y - 165) / 40, xr = Math.round(149 + 26 * Math.sin(v * Math.PI / 2)); if (ih(y, 3, 317) < 0.5) PS(xr - 1, y, P.k11); if (ih(y, 4, 318) < 0.25) PS(xr - 2, y, P.k10); }
-  return {kind: 'loco', w: LOCO_W, cv, plow, wins: [Object.assign(cabWin, {painter: pCab, light: {c: [1.0, 0.56, 0.26], k: 0.6, f: () => 1.0, z: 12, cab: true}})], lamps, bogies: [], lens: {x: 153, y: 134}, stack: {x: 128.5, y: 113}, ashpan: {x: 39.5, y: 189}, bulbs};
+  return {kind: 'loco', w: LOCO_W, cv, plow, wins: [Object.assign(cabWin, {painter: pCab, light: {c: [1.0, 0.56, 0.26], k: 0.6, f: () => 1.0, z: 12, cab: true}})], lamps, bogies: [], lens: {x: 153, y: 134}, stack: {x: 128.5, y: 113}, ashpan: {x: 39.5, y: 189}, bulbs, label: {name: '车头', desc: '烧煤的蒸汽机车，前面的雪铲推开积雪'}};
+}
+
+// ---- generic body helpers for cars of any length ----
+function paintBody(S, w, y0, y1, pal, o){
+  o = o || {};
+  for (let y = y0; y <= y1; y++) for (let x = 0; x < w; x++){
+    let t = (o.t0 === undefined ? 0.6 : o.t0) - (y - y0) / Math.max(1, y1 - y0) * (o.drop === undefined ? 0.4 : o.drop);
+    if (o.glowTop && y <= y0 + 4) t += 0.2 - (y - y0) * 0.05;
+    let c = (o.d2 ? ramp2 : ramp)(pal, t, x, y);
+    if (o.planks && x % o.planks === 0) c = pal[1];
+    if (o.seams && x % o.seams === Math.floor(o.seams / 2)) c = pal[1];
+    S(x, y, c);
+  }
+}
+function trimRow(S, w, y, c){ for (let x = 0; x < w; x++) S(x, y, c); }
+function rectWindow(S, E, CLR, wx, wy, ww, wh, frame, frameDark, sill){
+  for (let x = wx - 1; x <= wx + ww; x++){ S(x, wy - 1, frameDark); S(x, wy + wh, sill || frame); }
+  for (let y = wy - 1; y <= wy + wh; y++){ S(wx - 1, y, frame); S(wx + ww, y, frameDark); }
+  for (let y = wy; y < wy + wh; y++) for (let x = wx; x < wx + ww; x++) CLR(x, y);
+}
+
+function buildTender(){
+  const w = 84, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  for (let y = 158; y <= 190; y++) for (let x = 0; x < w; x++){
+    let c = ramp2(BK.slice(1, 7), 0.62 - (y - 158) / 32 * 0.45, x, y);
+    if (y >= 164 && y <= 167) c = y === 164 ? TR[6] : (y === 167 ? TR[2] : TR[4]);
+    if (y === 158) c = BR[5]; if (y === 159) c = BR[2];
+    if (y === 186) c = TR[4]; if (y === 187) c = TR[2];
+    if ((y === 172 || y === 182) && x % 6 === 3) c = BR[3];
+    S(x, y, c);
+  }
+  for (let y = 147; y <= 157; y++) for (let x = 3; x < w - 18; x++) S(x, y, y === 147 ? BR[4] : ramp(BK.slice(1, 6), 0.5 - (y - 148) / 10 * 0.3, x, y));
+  for (let x = 5; x < w - 20; x++){
+    const tt = (x - 5) / (w - 25), hh = Math.max(1, Math.round(9 * Math.sin(tt * Math.PI) + 2 + (ih(x, 1, 401) - 0.5) * 3));
+    for (let j = 0; j < hh; j++){ const y = 146 - j; let c = ih(x, y, 402) < 0.25 ? BK[4] : (ih(x, y, 403) < 0.5 ? BK[1] : BK[2]); if (ih(x, y, 404) < 0.06) c = BK[6]; S(x, y, c); }
+    const top = 146 - hh; if (ih(x, 2, 405) < 0.75){ S(x, top, P.k12); if (ih(x, 3, 406) < 0.45) S(x, top - 1, P.k13); }
+  }
+  for (let y = 151; y <= 157; y++){ const inset = y === 151 ? 2 : (y === 152 ? 1 : 0); for (let x = w - 16 + inset; x <= w - 7 - inset; x++) S(x, y, y === 151 ? BR[6] : ramp([BR[5], BR[4], BR[3], BR[2]], (x - (w - 16)) / 10, x, y)); }
+  snowTop(S, w - 14, w - 9, 150, 407, 1);
+  for (let y = 172; y <= 180; y++) for (let x = 28; x <= 44; x++) S(x, y, (y === 172 || x === 28) ? BK[5] : (y === 180 || x === 44 ? BK[1] : BK[3]));
+  S(36, 176, BR[5]);
+  for (let y = 158; y <= 190; y++){ S(w - 4, y, BR[3]); S(w - 2, y, BR[3]); if (y % 4 === 0) S(w - 3, y, BR[5]); }
+  const lamps = [lanternAt(S, E, 3, 150)];
+  underframe(S, L, 400, w);
+  const bulbs = stringWire(S, 0, w - 1, 160, 21, 2, 408);
+  return {kind: 'tender', w, cv, wins: [], lamps, bogies: [20, w - 20], bulbs, label: {name: '煤水车', desc: '装着煤和水，供给车头'}};
+}
+
+function buildDorm(){
+  const w = 184, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  const RS = [P.r0, P.r1, P.r2, P.r3, P.r4, P.r5, C('#a46c48')];
+  paintBody(S, w, 113, 190, RS, {t0: 0.62, drop: 0.42, d2: true, seams: 46});
+  for (let y = 114; y <= 118; y++) for (let x = 0; x < w; x++) S(x, y, mixC(RS[4], C('#c88a5a'), (118 - y) * 0.08));
+  trimRow(S, w, 112, CR[4]); trimRow(S, w, 113, CR[2]);
+  for (const y of [137, 138, 139]) trimRow(S, w, y, y === 137 ? CR[4] : (y === 139 ? CR[1] : CR[2]));
+  trimRow(S, w, 172, BR[4]); trimRow(S, w, 173, BR[2]);
+  trimRow(S, w, 188, BR[2]); trimRow(S, w, 189, P.r0); trimRow(S, w, 190, BK[1]);
+  for (let x = 2; x < w; x += 8){ S(x, 176, BR[3]); S(x, 184, BR[3]); }
+  const wins = [];
+  let seed = 0;
+  // upper deck: 7 small windows
+  for (let i = 0; i < 7; i++){
+    const wx = 12 + i * 24, wy = 119, ww = 14, wh = 13, lit = ih(i, 7, 811) < 0.72;
+    rectWindow(S, E, CLR, wx, wy, ww, wh, CR[3], CR[1], CR[5]);
+    for (let x = wx; x < wx + ww; x++) S(x, wy + 4, CR[2]);
+    windowBox(S, E, wx - 1, wx + ww, wy + wh + 1, 900 + i);
+    const win = {x: wx, y: wy, w: ww, h: wh, painter: pFlat, seed: seed++, lit};
+    if (lit) win.light = {c: [1.0, 0.70, 0.42], k: 0.72, f: () => 1.0, z: 14};
+    wins.push(win);
+  }
+  // lower deck: 6 windows
+  for (let i = 0; i < 6; i++){
+    const wx = 16 + i * 26, wy = 147, ww = 18, wh = 19, lit = ih(i, 9, 812) < 0.8;
+    rectWindow(S, E, CLR, wx, wy, ww, wh, CR[3], CR[1], CR[5]);
+    for (let x = wx; x < wx + ww; x++) S(x, wy + 6, CR[2]);
+    for (let x = wx - 1; x <= wx + ww; x++) if (ih(x, 5, 813 + i) < 0.5){ S(x, wy + wh - 1, C('#ffe9c6')); E(x, wy + wh - 1, mulC(C('#ffd89a'), 0.3)); }
+    const win = {x: wx, y: wy, w: ww, h: wh, painter: pFlat, seed: seed++, lit};
+    if (lit) win.light = {c: [1.0, 0.68, 0.40], k: 0.78, f: () => 1.0, z: 16};
+    wins.push(win);
+  }
+  // end doors
+  for (const dx0 of [1, 174]){
+    for (let y = 142; y <= 187; y++) for (let x = dx0; x < dx0 + 9; x++) S(x, y, (x === dx0 || x === dx0 + 8) ? CR[1] : ramp(RS, 0.5 - (y - 142) / 45 * 0.25, x, y));
+    for (let x = dx0; x < dx0 + 9; x++) S(x, 142, CR[3]);
+    for (let y = 147; y <= 158; y++) for (let x = dx0 + 2; x <= dx0 + 6; x++) CLR(x, y);
+    wins.push({x: dx0 + 2, y: 147, w: 5, h: 12, painter: pDoor});
+    S(dx0 + (dx0 < 50 ? 7 : 1), 168, BR[5]);
+    steps(S, dx0);
+  }
+  // roof (flat, higher) with snow, two little chimneys
+  for (let x = -1; x <= w; x++) for (let y = 106; y <= 111; y++) S(x, y, ramp(RF, (y - 106) / 5, x, y));
+  snowTop(S, -1, w, 105, 814, 2);
+  icicles(S, -1, w, 112, 815, 0.05, 2);
+  for (const cx of [40, 140]){ for (let y = 92; y <= 104; y++){ S(cx, y, CU[3]); S(cx + 1, y, CU[1]); } for (let x = cx - 2; x <= cx + 3; x++){ S(x, 90, CU[4]); S(x, 91, CU[2]); } }
+  const lamps = [Object.assign(lanternAt(S, E, 12, 141), {pl: true}), lanternAt(S, E, 171, 141)];
+  underframe(S, L, 810, w);
+  const bulbs = stringWire(S, 0, w - 1, 114, 23, 2, 816).concat(stringWire(S, 0, w - 1, 140, 23, 2, 817));
+  return {kind: 'dorm', w, cv, wins, lamps, bogies: [26, w - 26], bulbs, smokes: [{x: 40.5, y: 88, scale: 0.4, warm: 0.5, dark: 1.25}, {x: 140.5, y: 88, scale: 0.4, warm: 0.5, dark: 1.25}], label: {name: '宿舍车厢', desc: '上下两层的小隔间，住着很多户人家'}};
+}
+
+function buildAqua(){
+  const w = 168, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  paintBody(S, w, 137, 190, TL, {t0: 0.62, drop: 0.42, glowTop: true, d2: true, seams: 28});
+  trimRow(S, w, 135, BR[5]); trimRow(S, w, 136, BR[2]);
+  for (let x = 2; x < w; x += 4){ S(x, 140, BR[3]); S(x, 177, BR[3]); }
+  trimRow(S, w, 172, BR[4]); trimRow(S, w, 173, BR[2]); trimRow(S, w, 186, BR[3]); trimRow(S, w, 188, BR[2]); trimRow(S, w, 189, TL[0]); trimRow(S, w, 190, BK[1]);
+  const wins = [], cxs = [24, 54, 84, 114, 144], cy = 156, R = 7;
+  cxs.forEach((cx, i) => {
+    for (let y = cy - R - 3; y <= cy + R + 3; y++) for (let x = cx - R - 3; x <= cx + R + 3; x++){
+      const dx = x - cx, dy = y - cy, d2 = dx * dx + dy * dy;
+      if (d2 <= R * R + 1) CLR(x, y);
+      else if (d2 <= (R + 2.3) * (R + 2.3)) S(x, y, (dx + dy < -2) ? BR[6] : (dx + dy < 3 ? BR[4] : BR[2]));
+    }
+    for (const [bx, by] of [[0, -R - 2], [0, R + 2], [-R - 2, 0], [R + 2, 0]]) S(cx + bx, cy + by, BR[1]);
+    wins.push({x: cx - R, y: cy - R, w: 2 * R + 1, h: 2 * R + 1, painter: pAqua, seed: i, light: {c: [0.30, 0.85, 0.85], k: 0.7, f: t => 0.9 + 0.1 * Math.sin(t * 1.3 + i), z: 14}});
+  });
+  for (const [x, y] of [[80, 180], [81, 179], [82, 179], [83, 179], [84, 180], [83, 181], [82, 181], [81, 181], [85, 179], [85, 181], [86, 180], [81, 180]]) S(x, y, BR[5]);
+  S(79, 180, BR[3]); S(78, 179, BR[3]); S(78, 181, BR[3]); S(82, 180, TL[1]);
+  roofTop(S, E, {seed: 600, w});
+  for (let y = 117; y <= 127; y++) for (let x = 50; x <= 118; x++){ let c = ramp2(CU, 1 - (y - 117) / 10, x, y); if (x === 50 || x === 118) c = CU[0]; if (x % 17 === 0) c = BR[4]; S(x, y, c); }
+  snowTop(S, 51, 117, 116, 601, 2);
+  for (let y = 127; y <= 134; y++){ S(54, y, CU[2]); S(114, y, CU[2]); }
+  const lamps = [Object.assign(lanternAt(S, E, 6, 146), {pl: true}), lanternAt(S, E, 162, 146)];
+  underframe(S, L, 600, w);
+  const bulbs = stringWire(S, 0, w - 1, 137, 21, 2, 602);
+  return {kind: 'aqua', w, cv, wins, lamps, bogies: [26, w - 26], bulbs, label: {name: '鱼塘车厢', desc: '养鱼，循环的水再拿去浇温室'}};
+}
+
+function buildClinic(){
+  const w = 168, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  paintBody(S, w, 137, 190, IV, {t0: 0.64, drop: 0.36, glowTop: true, d2: true, seams: 42});
+  trimRow(S, w, 135, IV[6]); trimRow(S, w, 136, IV[3]); trimRow(S, w, 140, MT[3]); trimRow(S, w, 141, MT[1]);
+  for (let y = 174; y <= 177; y++) trimRow(S, w, y, y === 174 ? MT[3] : (y === 177 ? MT[0] : MT[2]));
+  trimRow(S, w, 188, IV[2]); trimRow(S, w, 189, IV[1]); trimRow(S, w, 190, BK[1]);
+  const wins = [];
+  [16, 70, 124].forEach((wx, i) => {
+    const ww = 28, wy = 146, wh = 22;
+    rectWindow(S, E, CLR, wx, wy, ww, wh, IV[6], IV[3], IV[6]);
+    for (let x = wx; x < wx + ww; x++) S(x, wy + 6, IV[5]);
+    frost(cv, wx, wy, ww, wh, 720 + i, 0.4);
+    wins.push({x: wx, y: wy, w: ww, h: wh, painter: pClinic, seed: i, light: {c: [1.0, 0.93, 0.84], k: 0.6, f: () => 1.0, z: 18}});
+  });
+  for (const ex of [57, 111]){
+    for (let y = 151; y <= 163; y++) for (let x = ex - 6; x <= ex + 6; x++){ const dx = x - ex, dy = y - 157; if (dx * dx + dy * dy <= 38) S(x, y, IV[6]); }
+    for (let k = -4; k <= 4; k++) for (let q = -1; q <= 1; q++){ S(ex + k, 157 + q, C('#48a868')); S(ex + q, 157 + k, C('#48a868')); }
+  }
+  roofTop(S, E, {seed: 700, w, pal: ['#6a666a', '#5a565a', '#4a464a', '#3c383c', '#302c30', '#262226'].map(C)});
+  for (let y = 120; y <= 127; y++) for (let x = 74; x <= 94; x++) S(x, y, (y === 120) ? IV[5] : ((x - 74) % 3 === 0 ? IV[2] : IV[3]));
+  snowTop(S, 74, 94, 119, 701, 1);
+  const lamps = [Object.assign(lanternAt(S, E, 7, 146), {pl: true}), lanternAt(S, E, 161, 146)];
+  underframe(S, L, 700, w);
+  const bulbs = stringWire(S, 0, w - 1, 137, 21, 2, 702);
+  for (const b of bulbs) b.c = ih(b.x, 3, 703) < 0.5 ? C('#fff2d8') : C('#ffe2b0');
+  return {kind: 'clinic', w, cv, wins, lamps, bogies: [26, w - 26], bulbs, label: {name: '医务车厢', desc: '病床和药柜，谁不舒服就来这里'}};
+}
+
+function buildLibrary(){
+  const w = 176, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv);
+  paintBody(S, w, 137, 190, NV, {t0: 0.66, drop: 0.42, glowTop: true, d2: true, seams: 44});
+  trimRow(S, w, 135, BR[5]); trimRow(S, w, 136, BR[2]);
+  trimRow(S, w, 139, BR[4]);
+  for (let y = 174; y <= 176; y++) trimRow(S, w, y, y === 174 ? BR[5] : (y === 176 ? BR[1] : BR[3]));
+  trimRow(S, w, 179, BR[4]); trimRow(S, w, 188, BR[2]); trimRow(S, w, 189, NV[0]); trimRow(S, w, 190, BK[1]);
+  const wins = [];
+  [18, 58, 98, 138].forEach((wx, i) => {
+    const ww = 20, wy = 142, wh = 30, cx = wx + 9.5, ay = 152, R = 10;
+    for (let y = wy - 2; y < wy + wh + 2; y++) for (let x = wx - 2; x < wx + ww + 2; x++){
+      const inArch = y >= ay ? (x >= wx && x < wx + ww) : ((x - cx) * (x - cx) + (y - ay) * (y - ay) <= R * R);
+      const inFrame = y >= ay ? (x >= wx - 1 && x < wx + ww + 1) : ((x - cx) * (x - cx) + (y - ay) * (y - ay) <= (R + 1.6) * (R + 1.6));
+      if (inArch && y < wy + wh) CLR(x, y); else if (inFrame && y <= wy + wh) S(x, y, (x < cx) ? BR[5] : BR[3]);
+    }
+    for (let x = wx - 2; x < wx + ww + 2; x++) S(x, wy + wh, BR[5]);
+    for (let y = ay - 9; y < wy + wh; y++) S(Math.round(cx), y, BR[2]);
+    wins.push({x: wx, y: wy, w: ww, h: wh, painter: pLib, seed: i, light: {c: [1.0, 0.72, 0.42], k: 0.72, f: t => 0.94 + 0.06 * wob(t * 0.5, 40 + i), z: 16}});
+  });
+  for (let x = 82; x <= 93; x++) for (let y = 181; y <= 185; y++) S(x, y, (y === 181 || x === 82) ? BR[5] : BR[3]);
+  roofTop(S, E, {seed: 800, w, pal: ['#3e4458', '#343a4c', '#2a3040', '#222736', '#1a1f2c', '#141824'].map(C)});
+  for (let y = 120; y <= 127; y++) for (let x = 78; x <= 98; x++){ const c = (y === 120 || x === 78 || x === 98 || x === 88) ? BR[4] : ramp(LIT, 0.75 - (y - 120) / 8 * 0.3, x, y); S(x, y, c); if (!(y === 120 || x === 78 || x === 98 || x === 88)) E(x, y, mulC(c, 0.5)); }
+  snowTop(S, 78, 98, 119, 801, 1);
+  const lamps = [Object.assign(lanternAt(S, E, 7, 146), {pl: true}), lanternAt(S, E, 169, 146)];
+  underframe(S, L, 800, w);
+  const bulbs = stringWire(S, 0, w - 1, 137, 22, 2, 802);
+  return {kind: 'library', w, cv, wins, lamps, bogies: [26, w - 26], bulbs, label: {name: '图书车厢', desc: '满满一车厢的书，白天也是孩子们的教室'}};
+}
+
+function buildPower(){
+  const w = 150, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv), m = 75;
+  paintBody(S, w, 137, 190, OC, {t0: 0.5, drop: 0.4, glowTop: true, d2: true, seams: 25});
+  trimRow(S, w, 135, WD[3]); trimRow(S, w, 136, WD[1]);
+  for (let x = 2; x < w; x += 5){ S(x, 140, WD[1]); S(x, 185, WD[1]); }
+  trimRow(S, w, 176, WD[2]); trimRow(S, w, 177, WD[0]); trimRow(S, w, 188, WD[2]); trimRow(S, w, 189, OC[0]); trimRow(S, w, 190, BK[1]);
+  const wins = [];
+  { const cx = 36, cy = 157, R = 9;
+    for (let y = cy - R - 3; y <= cy + R + 3; y++) for (let x = cx - R - 3; x <= cx + R + 3; x++){ const dx = x - cx, dy = y - cy, d2 = dx * dx + dy * dy; if (d2 <= R * R + 1) CLR(x, y); else if (d2 <= (R + 2.3) * (R + 2.3)) S(x, y, (dx + dy < -2) ? BR[6] : (dx + dy < 3 ? BR[4] : BR[2])); }
+    wins.push({x: cx - R, y: cy - R, w: 2 * R + 1, h: 2 * R + 1, painter: pFlywheel, light: {c: [1.0, 0.6, 0.3], k: 0.6, f: t => 0.85 + 0.15 * wob(t, 31), z: 14}}); }
+  rectWindow(S, E, CLR, 92, 148, 24, 18, WD[3], WD[1], WD[4]);
+  wins.push({x: 92, y: 148, w: 24, h: 18, painter: pBoiler, light: {c: [1.0, 0.55, 0.24], k: 0.85, f: t => 0.8 + 0.2 * wob(t * 1.2, 33), z: 12}});
+  for (let k = 0; k < 3; k++) for (let y = 163; y <= 170; y++) S(64 + k * 6, y, (y === 163) ? BR[5] : BR[2]);
+  roofTop(S, E, {seed: 900, w});
+  // windmill tower, nacelle
+  for (let y = 98; y <= 127; y++){ const hw = Math.round(1 + (y - 98) / 29 * 4); S(m - hw, y, BK[3]); S(m + hw, y, BK[2]); if ((y - 98) % 4 === 0) for (let i = -hw; i <= hw; i++) S(m + i, y, BK[3]); else if ((y - 98) % 4 === 2) S(m, y, BK[2]); }
+  for (let y = 92; y <= 97; y++) for (let x = m - 4; x <= m + 4; x++) S(x, y, y === 92 ? OC[5] : (x === m - 4 ? OC[4] : OC[2]));
+  snowTop(S, m - 3, m + 3, 91, 901, 1);
+  for (let y = 108; y <= 127; y++){ S(128, y, CU[3]); S(129, y, CU[2]); S(130, y, CU[1]); }
+  for (let x = 126; x <= 132; x++){ S(x, 106, CU[4]); S(x, 107, CU[2]); }
+  const lamps = [Object.assign(lanternAt(S, E, 7, 146), {pl: true}), lanternAt(S, E, 143, 146)];
+  underframe(S, L, 900, w);
+  const bulbs = stringWire(S, 0, w - 1, 137, 25, 2, 902);
+  return {kind: 'power', w, cv, wins, lamps, bogies: [24, w - 24], bulbs, rotor: {x: m, y: 94.5}, smokes: [{x: 129, y: 104, scale: 0.55, warm: 0.6, dark: 1.1}], label: {name: '发电车厢', desc: '屋顶的风车加上锅炉，给全车供电取暖'}};
+}
+
+function buildCaboose(){
+  const w = 140, cv = carCanvas(w), {S, E, CLR, L} = painterFor(cv), m = 80;
+  for (let y = 137; y <= 190; y++) for (let x = 12; x < w; x++){ let t = 0.62 - (y - 137) / 53 * 0.4; if (y <= 141) t += 0.2 - (y - 137) * 0.05; let c = ramp(TR, t, x, y); if (x % 4 === 0) c = TR[1]; S(x, y, c); }
+  for (let x = 12; x < w; x++){ S(x, 135, CR[4]); S(x, 136, CR[2]); S(x, 176, CR[3]); S(x, 177, CR[1]); S(x, 188, CR[2]); S(x, 189, TR[1]); S(x, 190, BK[1]); }
+  // rear platform with a brass railing
+  for (let x = 0; x < 12; x++){ S(x, 186, BK[3]); S(x, 187, BK[1]); S(x, 166, BR[5]); S(x, 176, BR[3]); }
+  for (const px of [0, 5, 10]) for (let y = 166; y <= 186; y++) S(px, y, BR[4]);
+  for (let y = 112; y <= 186; y++){ S(14, y, BR[3]); S(17, y, BR[3]); if (y % 4 === 0){ S(15, y, BR[4]); S(16, y, BR[4]); } }
+  const wins = [];
+  [32, 104].forEach((wx, i) => { rectWindow(S, E, CLR, wx, 148, 12, 14, CR[3], CR[1], CR[5]); wins.push({x: wx, y: 148, w: 12, h: 14, painter: pCaboose, seed: i, light: {c: [1.0, 0.66, 0.38], k: 0.75, f: t => 0.88 + 0.12 * wob(t, 50 + i), z: 12}}); });
+  roofTop(S, E, {seed: 950, w, x0: 12});
+  // cupola
+  for (let y = 112; y <= 127; y++) for (let x = m - 16; x <= m + 16; x++){ let c = ramp(TR, 0.66 - (y - 112) / 15 * 0.3, x, y); if (x === m - 16) c = TR[6]; if (x === m + 16) c = TR[1]; S(x, y, c); }
+  for (let x = m - 16; x <= m + 16; x++){ S(x, 127, CR[2]); }
+  for (const cx0 of [m - 12, m + 5]){ for (let y = 115; y <= 121; y++) for (let x = cx0; x < cx0 + 8; x++) CLR(x, y); for (let x = cx0 - 1; x <= cx0 + 8; x++){ S(x, 114, CR[2]); S(x, 122, CR[4]); } for (let y = 114; y <= 122; y++){ S(cx0 - 1, y, CR[3]); S(cx0 + 8, y, CR[1]); } wins.push({x: cx0, y: 115, w: 8, h: 7, painter: pCupola}); }
+  for (let y = 108; y <= 111; y++) for (let x = m - 19; x <= m + 19; x++) S(x, y, ramp(RF, (y - 108) / 3, x, y));
+  snowTop(S, m - 19, m + 19, 107, 951, 2);
+  // searchlight drum on the cupola roof, lens facing back (left)
+  for (let y = 99; y <= 105; y++) for (let x = m - 6; x <= m + 2; x++) S(x, y, y === 99 ? BR[6] : (y === 105 ? BR[1] : (x === m - 6 ? BR[5] : BR[3])));
+  for (let y = 100; y <= 104; y++){ S(m - 7, y, C('#fff6e4')); E(m - 7, y, C('#fff6e4')); }
+  for (let y = 105; y <= 106; y++) S(m - 2, y, BK[2]);
+  // red marker lamps at the very back
+  for (const ly of [150, 182]) for (let j = 0; j < 3; j++){ S(12, ly + j, C('#ff4a3a')); S(13, ly + j, C('#ff7a5a')); E(12, ly + j, C('#ff3a2a')); E(13, ly + j, C('#ff6a4a')); }
+  for (let y = 112; y <= 127; y++){ S(118, y, CU[3]); S(119, y, CU[1]); }
+  for (let x = 116; x <= 121; x++){ S(x, 110, CU[4]); S(x, 111, CU[2]); }
+  const lamps = [Object.assign(lanternAt(S, E, 24, 142), {pl: true})];
+  underframe(S, L, 950, w);
+  const bulbs = stringWire(S, 12, w - 1, 137, 21, 2, 952).concat(stringWire(S, m - 16, m + 16, 123, 11, 1, 953));
+  return {kind: 'caboose', w, cv, wins, lamps, bogies: [30, w - 22], bulbs, tails: [{x: 12.5, y: 151.5}, {x: 12.5, y: 183.5}], searchlight: {x: m - 7, y: 102}, smokes: [{x: 118.5, y: 108, scale: 0.4, warm: 0.5, dark: 1.25}], label: {name: '瞭望车厢', desc: '车尾的瞭望台，探照灯照着走过的路'}};
 }
 
 /* ---------- assemble the train ---------- */
-const cars = [buildWorkshop(), buildGreenhouse(), buildLiving(), buildLoco()];
+const cars = [buildCaboose(), buildWorkshop(), buildPower(), buildLibrary(), buildClinic(), buildAqua(), buildDorm(), buildGreenhouse(), buildLiving(), buildTender(), buildLoco()];
 let cx0 = PAD;
 for (const c of cars){ c.x = cx0; cx0 += c.w + GAP; }
 const TRW = cx0 - GAP + PAD;
-const loco = cars[3], living = cars[2], green = cars[1], work = cars[0];
+const loco = cars[cars.length - 1];
 const LOCO_FRONT = loco.x + 176;
 const TC = new PC(TRW, TH), TE = new PC(TRW, TH);
 const TCb = new Uint8Array(TC.d.buffer), TEb = new Uint8Array(TE.d.buffer);
 for (const car of cars) for (const w of car.wins){
   w.cache = {col: new PC(w.w, w.h), emi: new PC(w.w, w.h)};
-  w.painter.stat(makeW(w.cache.col, w.cache.emi, 0, 0, w.w, w.h));
+  w.painter.stat(makeW(w.cache.col, w.cache.emi, 0, 0, w.w, w.h), w);
 }
 const lightWins = [];
 for (const car of cars){ for (const w of (car.lightWins || car.wins)) if (w.light) lightWins.push({car, w}); }
@@ -1000,68 +1391,108 @@ function bounceOf(car, dist){ if (REDUCED) return 0; const bs = car.kind === 'lo
 function fireboxOpen(t){ const ph = mod(t, 7.5); if (ph > 1.6) return 0; return Math.min(1, ph / 0.2) * Math.min(1, (1.6 - ph) / 0.35); }
 
 const state = {fire: 0, bounce: {}};
+const trainView = {x0: 0, x1: TRW};
+const carNear = (car, m) => car.x + car.w > trainView.x0 - m && car.x < trainView.x1 + m;
+function drawRotor(cx, cy, t){
+  const a0 = t * 1.1;
+  for (let k = 0; k < 4; k++){
+    const a = a0 + k * Math.PI / 2, ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca;
+    for (let s = 2; s <= 14; s += 0.5){ const x = cx + ca * s, y = cy + sa * s; TSE(Math.round(x), Math.round(y), WD[4]); if (s > 4){ TSE(Math.round(x + px * 1.5), Math.round(y + py * 1.5), CR[3]); TSE(Math.round(x + px * 2.6), Math.round(y + py * 2.6), CR[1]); } }
+  }
+  TSE(Math.round(cx), Math.round(cy), BR[6]); TSE(Math.round(cx) + 1, Math.round(cy), BR[3]); TSE(Math.round(cx), Math.round(cy) + 1, BR[3]);
+}
+let trainTmpC = null, trainTmpE = null;
+function uploadTrain(){
+  const xa = clamp(Math.floor(trainView.x0) - 48, 0, TRW), xb = clamp(Math.ceil(trainView.x1) + 48, 0, TRW), wpx = xb - xa;
+  if (wpx <= 0) return;
+  if (IS_GL2){
+    gl.pixelStorei(gl.UNPACK_ROW_LENGTH, TRW); gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, xa);
+    gl.bindTexture(gl.TEXTURE_2D, texTrain); gl.texSubImage2D(gl.TEXTURE_2D, 0, xa, 0, wpx, TH, gl.RGBA, gl.UNSIGNED_BYTE, TCb);
+    gl.bindTexture(gl.TEXTURE_2D, texTrainE); gl.texSubImage2D(gl.TEXTURE_2D, 0, xa, 0, wpx, TH, gl.RGBA, gl.UNSIGNED_BYTE, TEb);
+    gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0); gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
+  } else {
+    if (!trainTmpC){ trainTmpC = new Uint32Array(TRW * TH); trainTmpE = new Uint32Array(TRW * TH); }
+    for (let y = 0; y < TH; y++){ trainTmpC.set(TC.d.subarray(y * TRW + xa, y * TRW + xb), y * wpx); trainTmpE.set(TE.d.subarray(y * TRW + xa, y * TRW + xb), y * wpx); }
+    gl.bindTexture(gl.TEXTURE_2D, texTrain); gl.texSubImage2D(gl.TEXTURE_2D, 0, xa, 0, wpx, TH, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trainTmpC.buffer, 0, wpx * TH * 4));
+    gl.bindTexture(gl.TEXTURE_2D, texTrainE); gl.texSubImage2D(gl.TEXTURE_2D, 0, xa, 0, wpx, TH, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(trainTmpE.buffer, 0, wpx * TH * 4));
+  }
+}
 function composeTrain(t, dist){
   TC.clear(); TE.clear();
   state.fire = fireboxOpen(t);
   for (const car of cars){
     const b = bounceOf(car, dist); state.bounce[car.kind] = b;
+    if (!carNear(car, 40)) continue;
     for (const w of car.wins){
       const x0 = car.x + w.x, y0 = w.y - TY0 + b;
       blitBoth(w.cache, x0, y0);
-      w.painter.dyn(makeW(TC, TE, x0, y0, w.w, w.h), t, state);
+      w.painter.dyn(makeW(TC, TE, x0, y0, w.w, w.h), t, state, w);
     }
     blitBoth(car.cv, car.x - car.cv.ox, b);
+    if (car.rotor) drawRotor(car.x + car.rotor.x, car.rotor.y + b, t);
     if (car.kind !== 'loco') for (const bx of car.bogies) bogie(car.x + bx);
   }
-  // locomotive moving parts
-  const X = loco.x, ang = dist / 12;
-  wheelSmall(X + 24, 198, 7, true);
-  const pins = [66, 94, 122].map(wx => wheelDriver(X + wx, 193, 12, ang));
-  const [p0, p1, p2] = pins;
-  for (let x = p0[0] - 1; x <= p2[0] + 1; x++){ TSE(x, p0[1] - 1, P.k8); TSE(x, p0[1], P.k5); }
-  for (const p of pins){ TSE(p[0], p[1] - 1, BR[6]); TSE(p[0], p[1], BR[4]); }
-  const chx = Math.round(p1[0] + Math.sqrt(Math.max(0, 28 * 28 - (p1[1] - 186) * (p1[1] - 186))));
-  TC.line(p1[0], p1[1] - TY0, chx, 186 - TY0, P.k6); TC.line(p1[0], p1[1] + 1 - TY0, chx, 187 - TY0, P.k3);
-  for (let x = chx; x <= chx + 3; x++) for (let y = 185; y <= 188; y++) TSE(x, y, y === 185 ? P.k8 : P.k4);
-  for (let x = chx + 4; x <= X + 128; x++) TSE(x, 186, P.k9);
-  wheelSmall(X + 146, 199, 6, true);
-  blitBoth(loco.plow, X - loco.plow.ox, 0);
-  const fb = state.fire, ag = 0.55 + 0.45 * wob(t * 0.8, 5);
-  for (let x = X + 34; x <= X + 45; x++){ const c = mixC(C('#c8501c'), C('#ffd27a'), clamp(ag * 0.6 + fb * 0.6, 0, 1)); TSE(x, 188, c, mulC(c, 0.9)); TSE(x, 189, mulC(c, 0.6), mulC(c, 0.5)); }
-  const fph = Math.floor(t * 7) % 3;
-  for (let i = 0; i < 9; i++){ const wave = [0, 1, 1, 0, -1, -1, 0, 1, 1][(i + fph * 2) % 9]; for (let j = 0; j < 4; j++) TS(X + 8 - i, 104 + j + wave, i < 2 ? TR[6] : (j === 0 ? TR[6] : TR[5])); }
-  // gangways between cars
+  if (carNear(loco, 40)){
+    // locomotive moving parts
+    const X = loco.x, ang = dist / 12;
+    wheelSmall(X + 24, 198, 7, true);
+    const pins = [66, 94, 122].map(wx => wheelDriver(X + wx, 193, 12, ang));
+    const [p0, p1, p2] = pins;
+    for (let x = p0[0] - 1; x <= p2[0] + 1; x++){ TSE(x, p0[1] - 1, P.k8); TSE(x, p0[1], P.k5); }
+    for (const p of pins){ TSE(p[0], p[1] - 1, BR[6]); TSE(p[0], p[1], BR[4]); }
+    const chx = Math.round(p1[0] + Math.sqrt(Math.max(0, 28 * 28 - (p1[1] - 186) * (p1[1] - 186))));
+    TC.line(p1[0], p1[1] - TY0, chx, 186 - TY0, P.k6); TC.line(p1[0], p1[1] + 1 - TY0, chx, 187 - TY0, P.k3);
+    for (let x = chx; x <= chx + 3; x++) for (let y = 185; y <= 188; y++) TSE(x, y, y === 185 ? P.k8 : P.k4);
+    for (let x = chx + 4; x <= X + 128; x++) TSE(x, 186, P.k9);
+    wheelSmall(X + 146, 199, 6, true);
+    blitBoth(loco.plow, X - loco.plow.ox, 0);
+    const fb = state.fire, ag = 0.55 + 0.45 * wob(t * 0.8, 5);
+    for (let x = X + 34; x <= X + 45; x++){ const c = mixC(C('#c8501c'), C('#ffd27a'), clamp(ag * 0.6 + fb * 0.6, 0, 1)); TSE(x, 188, c, mulC(c, 0.9)); TSE(x, 189, mulC(c, 0.6), mulC(c, 0.5)); }
+    const fph = Math.floor(t * 7) % 3;
+    for (let i = 0; i < 9; i++){ const wave = [0, 1, 1, 0, -1, -1, 0, 1, 1][(i + fph * 2) % 9]; for (let j = 0; j < 4; j++) TS(X + 8 - i, 104 + j + wave, i < 2 ? TR[6] : (j === 0 ? TR[6] : TR[5])); }
+  }
+  // gangways between passenger cars, plain couplers next to the engine and tender
   for (let k = 0; k < cars.length - 1; k++){
-    const gx0 = cars[k].x + cars[k].w, gx1 = cars[k + 1].x;
-    for (let x = gx0; x < gx1; x++){ for (let y = 142; y <= 186; y++) TS(x, y, ((y >> 1) % 2) ? WD[0] : WD[2]); TS(x, 141, P.k11); for (let y = 186; y <= 191; y++) TS(x, y, y === 186 ? P.k4 : P.k2); }
+    const A = cars[k], B = cars[k + 1];
+    if (!carNear(A, 40) && !carNear(B, 40)) continue;
+    const gx0 = A.x + A.w, gx1 = B.x, bellows = A.kind !== 'tender' && B.kind !== 'tender' && B.kind !== 'loco';
+    for (let x = gx0; x < gx1; x++){
+      if (bellows){ for (let y = 142; y <= 186; y++) TS(x, y, ((y >> 1) % 2) ? WD[0] : WD[2]); TS(x, 141, P.k11); }
+      for (let y = 186; y <= 191; y++) TS(x, y, y === 186 ? P.k4 : P.k2);
+    }
     for (let x = gx0 - 1; x <= gx1; x++) TS(x, 189, BR[3]);
   }
   // twinkling strings of little lights
   for (const car of cars){
+    if (!carNear(car, 40)) continue;
     const b = state.bounce[car.kind] || 0;
     for (const bl of car.bulbs){ const tw = 0.7 + 0.3 * Math.sin(t * bl.sp + bl.ph); TSE(car.x + bl.x, bl.y + b, mixC(mulC(bl.c, 0.6), bl.c, tw), mulC(bl.c, 0.95 * tw)); }
   }
-  gl.bindTexture(gl.TEXTURE_2D, texTrain); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TRW, TH, gl.RGBA, gl.UNSIGNED_BYTE, TCb);
-  gl.bindTexture(gl.TEXTURE_2D, texTrainE); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TRW, TH, gl.RGBA, gl.UNSIGNED_BYTE, TEb);
+  uploadTrain();
 }
 
-function updateLights(t){
+// only the lights near the camera fit in the shader, so pick the closest ones each frame
+function updateLights(t, viewC){
+  const half = view.w / 2 + 150, cand = [];
+  for (const Lw of lightWins){ const cx = Lw.car.x + Lw.w.x + Lw.w.w / 2, d = Math.abs(cx - viewC); if (d < half) cand.push([d, Lw]); }
+  cand.sort((a, b) => a[0] - b[0]);
   for (let i = 0; i < NWIN; i++){
-    const o = i * 4, Lw = lightWins[i];
+    const o = i * 4, Lw = cand[i] && cand[i][1];
     if (!Lw){ uWin.set([0, 0, 0, 0], o); uWinC.set([0, 0, 0, 10], o); continue; }
-    const {car, w} = Lw, li = w.light;
-    const x0 = car.x + w.x, x1 = x0 + w.w;
-    uWin.set([x0, x1, GROUND_Y - (w.y + w.h), GROUND_Y - w.y], o);
+    const {car, w} = Lw, li = w.light, x0 = car.x + w.x;
+    uWin.set([x0, x0 + w.w, GROUND_Y - (w.y + w.h), GROUND_Y - w.y], o);
     let k = li.k * li.f(t);
     if (li.cab) k = li.k + 1.1 * state.fire + 0.12 * wob(t, 3);
     uWinC.set([li.c[0] * k, li.c[1] * k, li.c[2] * k, li.z], o);
   }
-  const pl = [];
-  for (const car of cars) for (const l of car.lamps) if (l.pl){ const k = 0.85 * (0.9 + 0.1 * wob(t * 1.7, car.x + l.x)); pl.push([car.x + l.x, GROUND_Y - l.y, D - 3, 15, 1.0 * k, 0.66 * k, 0.34 * k]); }
+  const pc = [];
+  const add = (x, h, z, r, cr, cg, cb) => { const d = Math.abs(x - viewC); if (d < half) pc.push([d, [x, h, z, r, cr, cg, cb]]); };
+  for (const car of cars) for (const l of car.lamps) if (l.pl){ const k = 0.85 * (0.9 + 0.1 * wob(t * 1.7, car.x + l.x)); add(car.x + l.x, GROUND_Y - l.y, D - 3, 15, 1.0 * k, 0.66 * k, 0.34 * k); }
   const ak = 0.55 + 1.4 * state.fire + 0.15 * wob(t * 0.8, 5);
-  pl.push([loco.x + loco.ashpan.x, GROUND_Y - loco.ashpan.y, D - 2, 20, 1.0 * ak, 0.42 * ak, 0.14 * ak]);
-  pl.push([work.x + work.tail.x, GROUND_Y - work.tail.y, D - 2, 14, 0.7, 0.07, 0.05]);
-  for (let i = 0; i < 8; i++){ const v = pl[i] || [0, -999, 0, 1, 0, 0, 0]; uPl.set([v[0], v[1], v[2], v[3]], i * 4); uPlC.set([v[4], v[5], v[6], 0], i * 4); }
+  add(loco.x + loco.ashpan.x, GROUND_Y - loco.ashpan.y, D - 2, 20, 1.0 * ak, 0.42 * ak, 0.14 * ak);
+  for (const car of cars) for (const tl of (car.tails || [])) add(car.x + tl.x, GROUND_Y - tl.y, D - 2, 13, 0.6, 0.06, 0.04);
+  pc.sort((a, b) => a[0] - b[0]);
+  for (let i = 0; i < 8; i++){ const v = pc[i] ? pc[i][1] : [0, -999, 0, 1, 0, 0, 0]; uPl.set([v[0], v[1], v[2], v[3]], i * 4); uPlC.set([v[4], v[5], v[6], 0], i * 4); }
 }
 
 /* =====================================================================
@@ -1070,6 +1501,7 @@ function updateLights(t){
 const canvas = document.getElementById('c');
 const ctxOpts = {antialias: false, alpha: false, depth: false, stencil: false, premultipliedAlpha: false, preserveDrawingBuffer: CAPTURE, powerPreference: 'high-performance'};
 const gl = (params.has('gl1') ? null : canvas.getContext('webgl2', ctxOpts)) || canvas.getContext('webgl', ctxOpts);
+const IS_GL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
 if (!gl){ document.getElementById('msg').textContent = '这个浏览器不支持 WebGL，暂时无法显示画面'; return; }
 canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); document.getElementById('msg').hidden = false; document.getElementById('msg').textContent = '画面中断了，正在恢复…'; });
 canvas.addEventListener('webglcontextrestored', () => location.reload());
@@ -1411,12 +1843,12 @@ void main(){
 }`;
 
 const FS_VOL = HEAD + `varying vec2 v_art;
-uniform vec2 u_lamp; uniform float u_time; uniform float u_fx; uniform float u_camX; uniform float u_headI; uniform float u_trainX; uniform float u_mode;
+uniform vec2 u_lamp; uniform float u_time; uniform float u_fx; uniform float u_camX; uniform float u_headI; uniform float u_trainX; uniform float u_mode; uniform float u_dirX;
 ${GL_NOISE}
 ${GL_LIGHT}
 void main(){
   vec3 acc = vec3(0.0);
-  vec2 d = v_art - u_lamp;
+  vec2 d = v_art - u_lamp; d.x *= u_dirX;
   float ax = max(d.x, 0.0);
   float spread = 3.0 + ax*0.36;
   float dyb = d.y - ax*0.10;
@@ -1579,11 +2011,11 @@ function resize(){
   chain.up0 = makeFBO(glowF.w, glowF.h, gl.LINEAR);
 }
 
-const cam = {pan: 0, vel: 0, drag: false, lastX: 0, idle: 0, auto: true, intro: !CAPTURE, introT: 0};
-const smooth01 = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
-function introPan(){ const [a] = panLimits(); return Math.max(a, (green.x + 70) - camLocalBase()); }
+const cam = {pan: 0, vel: 0, drag: false, lastX: 0, idle: 99, tour: !CAPTURE, phase: 0, resync: false};
+const TOUR_PERIOD = 140;
 function camLocalBase(){ return view.portrait ? LOCO_FRONT - view.w * 0.5 : LOCO_FRONT - (0.78 - 0.5) * view.w; }
-function panLimits(){ const base = camLocalBase(); const minL = view.w / 2 - 30, maxL = LOCO_FRONT + 230 - view.w / 2; return [minL - base, maxL - base]; }
+function panLimits(){ const base = camLocalBase(); const minL = view.w / 2 - 150, maxL = LOCO_FRONT + 230 - view.w / 2; return [minL - base, maxL - base]; }
+function tourPan(phase){ const [a] = panLimits(); return a * (0.5 - 0.5 * Math.cos(phase)); }
 
 let simTime = +(params.get('t') || 6.0), lastNow = null, paused = false;
 let fxTarget = params.get('fx') === '0' ? 0 : 1, fxCur = fxTarget;
@@ -1591,15 +2023,15 @@ const vec4View = () => [view.x0, view.y0, view.w, view.h];
 
 function render(t){
   const dist = SPEED * t;
-  if (view.portrait && cam.auto && !cam.drag && !CAPTURE){ const [a, b] = panLimits(); const mid = (a + b) / 2, amp = (b - a) / 2 * 0.86; cam.pan = mid + amp * Math.sin(t * 0.11 + 1.2); }
   const camLocal = camLocalBase() + cam.pan;
   view.x0 = camLocal - view.w / 2;
   const cxv = camLocal, trainX = 0;   // art x is train-local x; the view slides along the train
   const camX = dist + camLocal;
   const V = vec4View();
   const fx = fxCur;
+  trainView.x0 = view.x0; trainView.x1 = view.x0 + view.w;
   composeTrain(t, dist);
-  updateLights(t);
+  updateLights(t, cxv);
   const lens = [trainX + loco.x + loco.lens.x, loco.lens.y];
   headU[0] = loco.x + loco.lens.x - 1; headU[1] = GROUND_Y - loco.lens.y; headU[2] = D + 15; headU[3] = 1.0;
   const fogC = FOG;
@@ -1633,30 +2065,30 @@ function render(t){
 
   strip(L.bank);
 
-  const smoke = (ps, emit, rel, warm, dark) => { const p = progs.smoke; gl.useProgram(p.p); setU(p, 'u_view', V); setU(p, 'u_time', t); setU(p, 'u_fx', fx); setU(p, 'u_cx', cxv); setU(p, 'u_trainX', trainX); setU(p, 'u_emit', emit); setU(p, 'u_rel', rel); setU(p, 'u_warm', warm); setU(p, 'u_dark', dark); drawParticles(p, ps); };
-  smoke(PS.smoke, [trainX + loco.x + loco.stack.x, loco.stack.y, 1.0], 1.0, 1.0, 1.0);
-  smoke(PS.smoke2, [trainX + living.x + living.chimney.x, living.chimney.y, 0.45], 0.9, 0.5, 1.25);
-  smoke(PS.steam, [trainX + work.x + work.chimney.x, work.chimney.y, 0.45], 0.9, 0.5, 1.25);
-  const ember = (ps, emit, boost, spread) => { const p = progs.ember; gl.useProgram(p.p); setU(p, 'u_view', V); setU(p, 'u_time', t); setU(p, 'u_fx', fx); setU(p, 'u_cx', cxv); setU(p, 'u_trainX', trainX); setU(p, 'u_emit', emit); setU(p, 'u_boost', boost); setU(p, 'u_spread', spread); drawParticles(p, ps); };
-  ember(PS.embers, [trainX + loco.x + loco.stack.x, loco.stack.y + 1], 0.35 + 0.5 * state.fire, 6);
-  ember(PS.wheelSparks, [trainX + loco.x + 94, 204], 0.12, 60);
-  ember(PS.embers2, [trainX + living.x + living.chimney.x, living.chimney.y + 1], 0.3, 2);
-  ember(PS.embers3, [trainX + work.x + work.chimney.x, work.chimney.y + 1], 0.25, 2);
+  const nearV = car => car.x + car.w > view.x0 - 140 && car.x < view.x0 + view.w + 60;
+  const smoke = (ps, emit, rel, warm, dark, toff) => { const p = progs.smoke; gl.useProgram(p.p); setU(p, 'u_view', V); setU(p, 'u_time', t + toff); setU(p, 'u_fx', fx); setU(p, 'u_cx', cxv); setU(p, 'u_trainX', trainX); setU(p, 'u_emit', emit); setU(p, 'u_rel', rel); setU(p, 'u_warm', warm); setU(p, 'u_dark', dark); drawParticles(p, ps); };
+  if (nearV(loco)) smoke(PS.smoke, [trainX + loco.x + loco.stack.x, loco.stack.y, 1.0], 1.0, 1.0, 1.0, 0);
+  cars.forEach((car, ci) => { if (car.smokes && nearV(car)) car.smokes.forEach((sm, si) => smoke(PS.smoke2, [trainX + car.x + sm.x, sm.y, sm.scale], 0.9, sm.warm, sm.dark, ci * 3.1 + si * 1.7)); });
+  const ember = (ps, emit, boost, spread, toff) => { const p = progs.ember; gl.useProgram(p.p); setU(p, 'u_view', V); setU(p, 'u_time', t + (toff || 0)); setU(p, 'u_fx', fx); setU(p, 'u_cx', cxv); setU(p, 'u_trainX', trainX); setU(p, 'u_emit', emit); setU(p, 'u_boost', boost); setU(p, 'u_spread', spread); drawParticles(p, ps); };
+  if (nearV(loco)){ ember(PS.embers, [trainX + loco.x + loco.stack.x, loco.stack.y + 1], 0.35 + 0.5 * state.fire, 6, 0); ember(PS.wheelSparks, [trainX + loco.x + 94, 204], 0.12, 60, 0); }
+  cars.forEach((car, ci) => { if (car.embers && nearV(car)) car.embers.forEach((em, ei) => ember(PS.embers2, [trainX + car.x + em.x, em.y], em.boost, em.spread, ci * 2.3 + ei)); });
   o = progs.spray; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_time', t); setU(o, 'u_fx', fx); setU(o, 'u_cx', cxv); setU(o, 'u_trainX', trainX); setU(o, 'u_plow', [trainX + LOCO_FRONT, 204]); setLights(o); drawParticles(o, PS.spray);
 
   snow(PS.nearSnow, [0.5 * D, 0.985 * D], 1.8, 1.0);
   snow(PS.focusFront, [0.84 * D, 0.99 * D], 1.8, 1.0);
   strip(L.fg); strip(L.fg2);
-  o = progs.pole; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_rect', [view.x0, view.y0, view.x0 + view.w, view.y0 + view.h]); setU(o, 'u_cx', cxv); setU(o, 'u_scroll', mod(camX * D / (0.3 * D), 4200)); setU(o, 'u_period', 4200); setU(o, 'u_fx', fx); setU(o, 'u_top', HORIZON + HCAM / 0.3 - 130 / 0.3); drawQuad(o);
+  if (!window.__noPole){ o = progs.pole; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_rect', [view.x0, view.y0, view.x0 + view.w, view.y0 + view.h]); setU(o, 'u_cx', cxv); setU(o, 'u_scroll', mod(camX * D / (0.3 * D), 4200)); setU(o, 'u_period', 4200); setU(o, 'u_fx', fx); setU(o, 'u_top', HORIZON + HCAM / 0.3 - 130 / 0.3); drawQuad(o); }
   snow(PS.bokeh, [0.2 * D, 0.45 * D], 2.0, 0.55);
 
   gl.blendFunc(gl.ONE, gl.ONE);
-  o = progs.vol; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_lamp', lens); setU(o, 'u_time', t); setU(o, 'u_fx', fx); setU(o, 'u_camX', mod(camX, 4096)); setU(o, 'u_headI', 1.0); setU(o, 'u_trainX', trainX); setLights(o);
+  o = progs.vol; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_lamp', lens); setU(o, 'u_time', t); setU(o, 'u_fx', fx); setU(o, 'u_camX', mod(camX, 4096)); setU(o, 'u_headI', 1.0); setU(o, 'u_trainX', trainX); setU(o, 'u_dirX', 1); setLights(o);
   if (fx > 0.01){
     const bx0 = Math.max(view.x0, lens[0] - 8), bx1 = view.x0 + view.w;
     if (bx1 > bx0){ setU(o, 'u_mode', 0); setU(o, 'u_rect', [bx0, lens[1] - 90, bx1, lens[1] + 100]); drawQuad(o); }
     const wx0 = Math.max(view.x0, trainX), wx1 = Math.min(view.x0 + view.w, trainX + LOCO_FRONT);
-    if (wx1 > wx0){ setU(o, 'u_mode', 1); setU(o, 'u_rect', [wx0 - 30, 112, wx1 + 30, 262]); drawQuad(o); }
+    if (wx1 > wx0){ setU(o, 'u_mode', 1); setU(o, 'u_rect', [wx0 - 30, 100, wx1 + 30, 262]); drawQuad(o); }
+    const cab = cars.find(c => c.searchlight);
+    if (cab && nearV(cab)){ const sl = [trainX + cab.x + cab.searchlight.x, cab.searchlight.y]; const sx0 = Math.max(view.x0, sl[0] - 420), sx1 = Math.min(view.x0 + view.w, sl[0] + 8); if (sx1 > sx0){ setU(o, 'u_lamp', sl); setU(o, 'u_dirX', -1); setU(o, 'u_mode', 0); setU(o, 'u_headI', 0.75); setU(o, 'u_rect', [sx0, sl[1] - 80, sx1, sl[1] + 120]); drawQuad(o); } }
   }
 
   // ---------- glow buffer (things that emit light) ----------
@@ -1666,11 +2098,11 @@ function render(t){
   o = progs.bright; gl.useProgram(o.p); setT(o, 'u_src', scene.tex, 0); setU(o, 'u_thr', 0.86); setU(o, 'u_gain', 0.7); drawQuad(o);
   o = progs.texk; gl.useProgram(o.p); setU(o, 'u_view', V); setU(o, 'u_rect', [trainX, TY0, trainX + TRW, TY0 + TH]); setT(o, 'u_tex', texTrainE, 0); setU(o, 'u_k', 0.75); drawQuad(o);
   const glow = (x, y, rx, ry, col, core) => { const p = progs.glow; gl.useProgram(p.p); setU(p, 'u_view', V); setU(p, 'u_rect', [x - rx, y - ry, x + rx, y + ry]); setU(p, 'u_col', col); setU(p, 'u_core', core || 6); drawQuad(p); };
-  for (const car of cars){ const b = state.bounce[car.kind] || 0; for (const l of car.lamps){ const k = 0.35 * (0.9 + 0.1 * wob(t * 1.7, car.x)); glow(trainX + car.x + l.x, l.y + b, 10, 10, [1.0 * k, 0.62 * k, 0.3 * k]); } }
+  for (const car of cars){ if (!nearV(car)) continue; const b = state.bounce[car.kind] || 0; for (const l of car.lamps){ const k = 0.35 * (0.9 + 0.1 * wob(t * 1.7, car.x)); glow(trainX + car.x + l.x, l.y + b, 10, 10, [1.0 * k, 0.62 * k, 0.3 * k]); } }
   glow(lens[0] + 0.5, lens[1], 20, 20, [0.75, 0.68, 0.55], 9);
   glow(lens[0] + 0.5, lens[1], 110, 2.5, [0.1, 0.12, 0.16], 3);
   const ap = [trainX + loco.x + loco.ashpan.x, loco.ashpan.y]; const ak = 0.25 + 0.6 * state.fire; glow(ap[0], ap[1], 18, 10, [1.0 * ak, 0.45 * ak, 0.15 * ak]);
-  glow(trainX + work.x + work.tail.x, work.tail.y, 8, 8, [0.7, 0.08, 0.05]);
+  for (const car of cars){ if (!nearV(car)) continue; for (const tl of (car.tails || [])) glow(trainX + car.x + tl.x, tl.y, 8, 8, [0.7, 0.08, 0.05]); if (car.searchlight) glow(trainX + car.x + car.searchlight.x - 0.5, car.searchlight.y, 16, 16, [0.62, 0.56, 0.46], 9); }
   for (const Ly of [L.city, L.near]){
     const sc = mod(camX * D / Ly.z, Ly.w);
     for (const li of Ly.lights){
@@ -1701,38 +2133,60 @@ function render(t){
    Loop, input, HUD
    ===================================================================== */
 const titleEl = document.getElementById('title'), hintEl = document.getElementById('hint'), msgEl = document.getElementById('msg');
-const fxBtn = document.getElementById('fxBtn'), pauseBtn = document.getElementById('pauseBtn');
+const fxBtn = document.getElementById('fxBtn'), pauseBtn = document.getElementById('pauseBtn'), tourBtn = document.getElementById('tourBtn');
+const labelEl = document.getElementById('carLabel'), nameEl = document.getElementById('carName'), descEl = document.getElementById('carDesc');
+let labelCar = null, labelTimer = 0, labelOn = false;
+function updateLabel(){
+  const c = camLocalBase() + cam.pan; let best = null, bd = 1e9;
+  for (const car of cars){ const d = Math.abs(car.x + car.w / 2 - c); if (d < bd){ bd = d; best = car; } }
+  if (best && best !== labelCar){ labelCar = best; labelEl.classList.add('fade'); clearTimeout(labelTimer); labelTimer = setTimeout(() => { nameEl.textContent = best.label.name; descEl.textContent = best.label.desc; if (labelOn) labelEl.classList.remove('fade'); }, 420); }
+}
 let fpsEl = null, fpsAcc = 0, fpsN = 0;
 if (DEBUG){ fpsEl = document.createElement('div'); fpsEl.id = 'fps'; document.body.appendChild(fpsEl); }
 resize();
 window.addEventListener('resize', resize);
 fxBtn.addEventListener('click', () => { fxTarget = fxTarget > 0.5 ? 0 : 1; fxBtn.textContent = fxTarget ? '光影：开' : '光影：关'; fxBtn.setAttribute('aria-pressed', fxTarget ? 'true' : 'false'); });
+tourBtn.addEventListener('click', () => { cam.tour = !cam.tour; cam.resync = true; cam.idle = 99; tourBtn.textContent = cam.tour ? '导览：开' : '导览：关'; tourBtn.setAttribute('aria-pressed', cam.tour ? 'true' : 'false'); });
 pauseBtn.addEventListener('click', () => { paused = !paused; pauseBtn.textContent = paused ? '继续' : '暂停'; pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false'); });
-canvas.addEventListener('pointerdown', e => { cam.drag = true; cam.auto = false; cam.intro = false; cam.lastX = e.clientX; cam.vel = 0; canvas.classList.add('drag'); canvas.setPointerCapture(e.pointerId); hintEl.classList.add('fade'); });
+canvas.addEventListener('pointerdown', e => { cam.drag = true; cam.resync = true; cam.idle = 0; cam.lastX = e.clientX; cam.vel = 0; canvas.classList.add('drag'); canvas.setPointerCapture(e.pointerId); hintEl.classList.add('fade'); });
 canvas.addEventListener('pointermove', e => { if (!cam.drag) return; const dx = (e.clientX - cam.lastX) * view.w / Math.max(1, window.innerWidth); cam.lastX = e.clientX; cam.pan -= dx; cam.vel = -dx * 60; const [a, b] = panLimits(); cam.pan = clamp(cam.pan, a, b); });
 const endDrag = () => { if (!cam.drag) return; cam.drag = false; cam.idle = 0; canvas.classList.remove('drag'); };
 canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
-window.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') cam.pan -= 20; else if (e.key === 'ArrowRight') cam.pan += 20; else return; cam.auto = false; cam.intro = false; const [a, b] = panLimits(); cam.pan = clamp(cam.pan, a, b); });
+window.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') cam.pan -= 20; else if (e.key === 'ArrowRight') cam.pan += 20; else return; cam.resync = true; cam.idle = 0; const [a, b] = panLimits(); cam.pan = clamp(cam.pan, a, b); });
 
 function frame(now){
   if (lastNow === null) lastNow = now;
   const dt = Math.min(0.1, (now - lastNow) / 1000); lastNow = now;
   if (!paused) simTime += dt;
   fxCur += (fxTarget - fxCur) * Math.min(1, dt * 5);
-  if (cam.intro && !view.portrait){ cam.introT += dt; cam.pan = introPan() * (1 - smooth01((cam.introT - 1.2) / 11)); if (cam.introT > 12.5) cam.intro = false; }
-  else if (!cam.drag){ cam.pan += cam.vel * dt; cam.vel *= Math.pow(0.02, dt); const [a, b] = panLimits(); if (cam.pan < a || cam.pan > b){ cam.pan = clamp(cam.pan, a, b); cam.vel = 0; } if (view.portrait && !cam.auto){ cam.idle += dt; if (cam.idle > 8) cam.auto = true; } }
+  const [pa, pb] = panLimits();
+  if (cam.drag) cam.idle = 0;
+  else {
+    cam.idle += dt;
+    if (cam.tour && cam.idle > 6){
+      if (cam.resync){ const u = clamp(pa < 0 ? cam.pan / pa : 0, 0, 1), ph = Math.acos(clamp(1 - 2 * u, -1, 1)); cam.phase = mod(cam.phase, 2 * Math.PI) > Math.PI ? 2 * Math.PI - ph : ph; cam.resync = false; }
+      cam.phase += dt * 2 * Math.PI / TOUR_PERIOD;
+      cam.pan += (tourPan(cam.phase) - cam.pan) * Math.min(1, dt * 2.5);
+    } else {
+      cam.pan += cam.vel * dt; cam.vel *= Math.pow(0.02, dt);
+      if (cam.pan < pa || cam.pan > pb){ cam.pan = clamp(cam.pan, pa, pb); cam.vel = 0; }
+    }
+  }
   render(simTime);
+  updateLabel();
   if (fpsEl){ fpsAcc += dt; fpsN++; if (fpsAcc > 0.5){ fpsEl.textContent = (fpsN / fpsAcc).toFixed(0) + ' fps  ' + view.rw + 'x' + view.rh + ' s' + view.s; fpsAcc = 0; fpsN = 0; } }
   requestAnimationFrame(frame);
 }
 msgEl.hidden = true;
 if (CAPTURE){
-  window.__render = (t, fx, pan) => { fxCur = fx === undefined ? 1 : fx; if (pan !== undefined){ cam.pan = pan; cam.auto = false; } render(t); return true; };
+  window.__render = (t, fx, pan) => { fxCur = fx === undefined ? 1 : fx; if (pan !== undefined) cam.pan = pan; render(t); return true; };
+  window.__cars = () => cars.map(c => ({kind: c.kind, x: c.x, w: c.w, base: camLocalBase()}));
   window.__dump = (name) => { const pc = name === 'track' ? trackG.pc : ({mount: genMountains, city: genCity, mid: genMid, near: genNear, fg: genFG, fg2: genFG2, bank: genBank})[name]().pc; const c = document.createElement('canvas'); c.width = pc.w; c.height = pc.h; const x = c.getContext('2d'); const id = x.createImageData(pc.w, pc.h); id.data.set(new Uint8Array(pc.d.buffer)); x.putImageData(id, 0, 0); return c.toDataURL(); };
   window.__ready = true;
   render(simTime);
 } else {
   setTimeout(() => titleEl.classList.add('fade'), 7000);
+  setTimeout(() => { labelOn = true; if (labelCar && nameEl.textContent) labelEl.classList.remove('fade'); }, 7600);
   setTimeout(() => hintEl.classList.add('fade'), 9000);
   requestAnimationFrame(frame);
 }
